@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { UserRole } from '../../common/enums';
+import { UserRole } from '@/common/';
 
 @Schema({ timestamps: true })
 export class User extends Document {
