@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "@nestjs-modules/mailer": "^2.0.2",
+    "@nestjs/mapped-types": "*",
+    "nodemailer": "^8.0.2"
+  },
+  "name": "safeschool",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Meriemelmm/SafeSchool.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Meriemelmm/SafeSchool/issues"
+  },
+  "homepage": "https://github.com/Meriemelmm/SafeSchool#readme",
+  "description": "",
+  "devDependencies": {
+    "@types/nodemailer": "^7.0.11"
+  }
+}
