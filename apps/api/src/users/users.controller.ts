@@ -28,6 +28,38 @@ async createByAdmin(@Body() userData: UserDto) {
     data: newUser
   }
 }
+  @Roles(UserRole.ADMIN)
+  @Get()
+  async findAll(@Query() query) {
+    const { skip, limit, ...filter } = query;
+    
+    const finalFilter = { isDeleted: { $ne: true }, ...filter };
+    
+    const result = await this.usersService.findAll(
+      finalFilter,
+      skip ? parseInt(skip, 10) : 0,
+      limit ? parseInt(limit, 10) : 10
+    );
+    
+    return {
+      message: "list des utilisateurs",
+      data: result.data,
+      total: result.total
+    };
+  }
+
+
+  @Roles(UserRole.ADMIN)
+  @Delete(':id')
+  async softDelete(@Param('id') id: string) {
+    const deletedUser = await this.usersService.softDelete(id);
+    return {
+      message: "Utilisateur supprimé avec succès",
+      data: deletedUser
+    };
+  }
+
+
 
 
 
