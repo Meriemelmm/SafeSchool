@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get,Query } from '@nestjs/common';
 import { SignalementService } from './signalement.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { CreateSignalementDto } from '@/signalement/dto/createsignalement.dto';
@@ -12,10 +12,10 @@ export class SignalementController {
   constructor(private readonly signalementService: SignalementService) { }
 
   @Post()
-  @UseGuards(JwtAuthGuard,RolesGuard)
-  @Roles  (UserRole.STUDENT,UserRole.PARENT)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.STUDENT, UserRole.PARENT)
   async create(
-    @Body() body: CreateSignalementDto, 
+    @Body() body: CreateSignalementDto,
     @Req() req
   ) {
     const signalement = await this.signalementService.create(body, req.user.id);
@@ -24,4 +24,15 @@ export class SignalementController {
       data: signalement
     };
   }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+ async findAll(@Query() query) {
+  const result = await this.signalementService.findAll(query);
+  return {
+    message: 'Liste des signalements récupérée avec succès',
+    ...result,
+  };
+}
 }
