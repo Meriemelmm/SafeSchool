@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException,BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Signalement, SignalementDocument } from '@/signalement/schemas/signalement.schema';
@@ -111,4 +111,74 @@ export class SignalementService {
         : undefined,
     };
   }
+  async updateStatusSignalement(
+  id: Types.ObjectId,
+  newStatus: StatutSignalement,
+ 
+) {
+  
+
+
+  
+
+  const signalement = await this.signalementModel.findOne({
+    _id: id,
+    isDeleted: false,
+  }).lean();
+
+  if (!signalement) {
+    throw new NotFoundException(
+      `Signalement avec l'ID "${id}" introuvable.`
+    );
+  }
+
+
+  if (signalement.status === newStatus) {
+    throw new BadRequestException(
+      `Le signalement a déjà le statut "${newStatus}".`
+    );
+  }
+
+
+  const transitions: Record<StatutSignalement, StatutSignalement[]> = {
+    [StatutSignalement.NOUVEAU]: [
+      StatutSignalement.EN_COURS,
+      StatutSignalement.REJETE,
+    ],
+    [StatutSignalement.EN_COURS]: [
+      StatutSignalement.EN_INVESTIGATION,
+      StatutSignalement.RESOLU,
+      StatutSignalement.REJETE,
+      StatutSignalement.ESCALADE,
+    ],
+    [StatutSignalement.EN_INVESTIGATION]: [
+      StatutSignalement.RESOLU,
+      StatutSignalement.REJETE,
+      StatutSignalement.ESCALADE,
+    ],
+    [StatutSignalement.ESCALADE]: [
+      StatutSignalement.EN_INVESTIGATION,
+      StatutSignalement.RESOLU,
+      StatutSignalement.REJETE,
+    ],
+    [StatutSignalement.RESOLU]: [],  
+    [StatutSignalement.REJETE]: [],   
+  };
+
+  const allowedTransitions = transitions[signalement.status];
+
+  if (!allowedTransitions.includes(newStatus)) {
+    throw new BadRequestException(
+      `Transition invalide : "${signalement.status}" → "${newStatus}" non autorisée.`
+    );
+  }
+
+  const updated = await this.signalementModel.findByIdAndUpdate(
+    id,
+    { $set: { status: newStatus } },
+    { new: true }
+  ).lean();
+
+  return updated;
+}
 }
