@@ -17,6 +17,12 @@ export class Preuve {
 
   @Prop({ default: Date.now })
   uploadedAt: Date;
+   // ─── Soft delete ────────────────────────────────────────────
+  @Prop({ default: false, index: true })
+  isDeleted: boolean;
+
+  @Prop({ type: Date, default: null })
+  deletedAt: Date | null;
 }
 
 export const PreuveSchema = SchemaFactory.createForClass(Preuve);
