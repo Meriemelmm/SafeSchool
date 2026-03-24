@@ -1,9 +1,9 @@
-import { Injectable, BadRequestException, InternalServerErrorException ,NotFoundException} from '@nestjs/common';
+import { Injectable, BadRequestException, InternalServerErrorException ,ForbiddenException,NotFoundException} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as fs from 'fs';
 import { Preuve, PreuveDocument } from './schemas/preuve.schema';
-import { TypeEpreuve,UserRole } from '@shared/enums';
+import { TypeEpreuve,UserRole,StatutSignalement } from '@shared/enums';
 import { Signalement ,SignalementDocument} from '@/signalement/schemas/signalement.schema';
 
 @Injectable()
@@ -100,4 +100,60 @@ export class PreuveService {
       preuves,
     };
   }
+
+async deletePreuve(id: Types.ObjectId, currentUser): Promise<{ message: string }> {
+
+  // ── Règle 1 : Preuve existe et non supprimée ──────────────
+  const preuve = await this.preuveModel.findOne({ 
+    _id: id, 
+    isDeleted: false 
+  });
+
+  if (!preuve) {
+    throw new NotFoundException(`Preuve avec l'ID "${id}" introuvable ou déjà supprimée.`);
+  }
+  
+  // ── Règle 2 : Signalement appartient à l'user ─────────────
+  const signalement = await this.signalementModel.findOne({
+    _id: preuve.signalementId,  
+    reportedBy: currentUser.id,         
+    isDeleted: false,
+  });
+
+  if (!signalement) {
+    throw new ForbiddenException(`Vous n'êtes pas autorisé à supprimer cette preuve.`);
+  }
+
+
+  const STATUTS_BLOQUES = [
+    StatutSignalement.RESOLU,
+    StatutSignalement.REJETE,
+    StatutSignalement.EN_INVESTIGATION,
+    StatutSignalement.ESCALADE,
+  ];
+
+  if (STATUTS_BLOQUES.includes(signalement.status)) {
+    throw new BadRequestException(
+      `Impossible de supprimer une preuve d'un signalement avec le statut "${signalement.status}".`
+    );
+  }
+
+ 
+  const filename = preuve.fileUrl.split('/').pop();
+  const filePath = `${this.uploadPath}/${filename}`;
+
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+    } catch (error) {
+      console.error(`Erreur suppression fichier ${filePath}:`, error);
+    }
+  }
+
+  preuve.isDeleted = true;
+  preuve.deletedAt = new Date();
+  await preuve.save();
+
+  return { message: 'Preuve supprimée avec succès.' };
+}
 }

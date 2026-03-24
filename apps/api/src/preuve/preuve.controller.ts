@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards,Get,Param ,UseInterceptors, UploadedFiles, Body, BadRequestException } from '@nestjs/common';
+import { Controller, Post,Delete, UseGuards,Get,Param ,UseInterceptors, UploadedFiles, Body, BadRequestException } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { PreuveService } from './preuve.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
@@ -6,6 +6,9 @@ import { multerConfig } from '@/common/upload.config';
 import { CreatePreuveDto } from './dto/create-preuve.dto';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Types } from 'mongoose';
+import { UserRole } from '@shared/enums';
+import { Roles } from '@/common/decorators/roles.decorator';
 
  
 
@@ -40,4 +43,11 @@ export class PreuveController {
        }
 
     }
+
+ @Delete(':id')
+@UseGuards(JwtAuthGuard,RolesGuard)
+@Roles(UserRole.PARENT,UserRole.STUDENT)
+async deletePreuve(@Param('id') id: Types.ObjectId,@CurrentUser()CurrentUser) {
+  return this.preuveService.deletePreuve(id,CurrentUser);
+}
 }
