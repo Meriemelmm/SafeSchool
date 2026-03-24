@@ -1,9 +1,10 @@
-import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, BadRequestException, InternalServerErrorException ,NotFoundException} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as fs from 'fs';
 import { Preuve, PreuveDocument } from './schemas/preuve.schema';
-import { TypeEpreuve } from '@shared/enums';
+import { TypeEpreuve,UserRole } from '@shared/enums';
+import { Signalement ,SignalementDocument} from '@/signalement/schemas/signalement.schema';
 
 @Injectable()
 export class PreuveService {
@@ -11,6 +12,7 @@ export class PreuveService {
 
   constructor(
     @InjectModel(Preuve.name) private preuveModel: Model<PreuveDocument>,
+     @InjectModel(Signalement.name) private signalementModel: Model<SignalementDocument>,
   ) {
     if (!fs.existsSync(this.uploadPath)) {
       fs.mkdirSync(this.uploadPath, { recursive: true });
@@ -66,5 +68,36 @@ export class PreuveService {
         fs.unlinkSync(file.path);
       }
     });
+  }
+  async findAllPreuvesBySignalement(id: string, currentUser: { id: string; role: UserRole }) {
+    const isAdminOrTeacher =
+      currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.TEACHER;
+
+    const signalementQuery: any = {
+      _id: id,
+      isDeleted: false,
+    };
+
+    if (currentUser.role===UserRole.STUDENT ||currentUser.role===UserRole.PARENT) {
+      signalementQuery.reportedBy = currentUser.id;
+    }
+
+    const signalement = await this.signalementModel.findOne(signalementQuery).lean();
+
+    if (!signalement) {
+      throw new NotFoundException(
+        `Signalement avec l'ID "${id}" introuvable ou accès refusé.`
+      );
+    }
+
+    const preuves = await this.preuveModel.find({
+      signalementId: signalement._id,
+      isDeleted: false,
+    }).lean();
+
+    return {
+      signalementId: id,
+      preuves,
+    };
   }
 }
