@@ -1,10 +1,12 @@
-import { Controller, Post, Body, UseGuards, Req, Get,Query } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get,Query,Param } from '@nestjs/common';
 import { SignalementService } from './signalement.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { CreateSignalementDto } from '@/signalement/dto/createsignalement.dto';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { UserRole } from '@shared/enums';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Types } from 'mongoose';
 
 @Controller('signalement')
 @UseGuards(JwtAuthGuard)
@@ -35,4 +37,15 @@ export class SignalementController {
     ...result,
   };
 }
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  async findOne(@Param('id') id: string, @CurrentUser() currentUser) {
+    console.log("id", id);
+    const signalement = await this.signalementService.findOne(id, currentUser);
+    return {
+      message: 'Signalement récupéré avec succès',
+      data: signalement,
+    };
+  }
+
 }
