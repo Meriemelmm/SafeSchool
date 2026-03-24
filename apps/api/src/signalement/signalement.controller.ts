@@ -1,12 +1,13 @@
-import { Controller, Post, Body, UseGuards, Req, Get,Query,Param } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get,Query,Param,Patch } from '@nestjs/common';
 import { SignalementService } from './signalement.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { CreateSignalementDto } from '@/signalement/dto/createsignalement.dto';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { UserRole } from '@shared/enums';
+import { UserRole,StatutSignalement } from '@shared/enums';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Types } from 'mongoose';
+
 
 @Controller('signalement')
 @UseGuards(JwtAuthGuard)
@@ -47,5 +48,22 @@ export class SignalementController {
       data: signalement,
     };
   }
+  @Patch(':id/status')
+  @UseGuards(JwtAuthGuard,RolesGuard)
+  @Roles(UserRole.ADMIN,UserRole.TEACHER)
+    async updateStatus(  @Param('id') id: Types.ObjectId,
+  @Body('status') status: StatutSignalement,
+){
+       const updated = await this.signalementService.updateStatusSignalement(
+    id,
+    status
+    
+  );
+  return {
+    message: "Statut mis à jour avec succès",
+    data: updated,
+  };
+
+    }
 
 }

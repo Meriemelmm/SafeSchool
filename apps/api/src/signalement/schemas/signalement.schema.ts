@@ -63,7 +63,7 @@ export class Signalement {
     required: true,
     type: String,
     enum: StatutSignalement,
-    default: StatutSignalement.EN_COURS
+    default: StatutSignalement.NOUVEAU
   })
   status: StatutSignalement;
 
