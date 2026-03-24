@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { SignalementMember, SignalementMemberDocument } from './schemas/signalementMember.schema';
-import { CreateMemberDto } from './dto/member.dto';
+import { CreateMemberDto, UpdateMemberDto } from './dto/member.dto';
 import { Signalement, SignalementDocument } from '@/signalement/schemas/signalement.schema';
-import { UserRole } from '@shared/enums';
-import { NotFoundException } from '@nestjs/common';
+import { UserRole, StatutSignalement } from '@shared/enums';
 
 @Injectable()
 export class SignalementMemberService {
@@ -29,6 +28,9 @@ export class SignalementMemberService {
 
     return this.memberModel.insertMany(membersWithSignalement);
   }
+
+ 
+
   async findMembersBySignalment(id: string, currentUser: { id: string; role: UserRole }) {
     const isAdminOrTeacher =
       currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.TEACHER;
@@ -41,6 +43,7 @@ export class SignalementMemberService {
     if (!isAdminOrTeacher) {
       signalementQuery.reportedBy = currentUser.id;
     }
+   
 
     const signalement = await this.signalementModel.findOne(signalementQuery).lean();
 
@@ -57,5 +60,48 @@ export class SignalementMemberService {
     }).exec();
 
     return members;
+  }
+
+  async deleteMember(id: Types.ObjectId, currentUser: { id: Types.ObjectId; role: UserRole }): Promise<{ message: string }> {
+   
+    const member = await this.memberModel.findOne({
+      _id: id,
+      isDeleted: { $ne: true }
+    });
+
+    if (!member) {
+      throw new NotFoundException(`Membre avec l'ID "${id}" introuvable ou déjà supprimé.`);
+    }
+
+    const signalement = await this.signalementModel.findOne({
+      _id: member.signalementId,
+      reportedBy: currentUser.id,
+      isDeleted: false,
+    });
+
+    if (!signalement) {
+      throw new ForbiddenException(`Vous n'êtes pas autorisé à supprimer ce membre.`);
+    }
+
+    
+    const STATUTS_BLOQUES = [
+      StatutSignalement.RESOLU,
+      StatutSignalement.REJETE,
+      StatutSignalement.EN_INVESTIGATION,
+      StatutSignalement.ESCALADE,
+    ];
+
+    if (STATUTS_BLOQUES.includes(signalement.status)) {
+      throw new BadRequestException(
+        `Impossible de supprimer un membre d'un signalement avec le statut "${signalement.status}".`
+      );
+    }
+
+  
+    member.isDeleted = true;
+    member.deletedAt = new Date();
+    await member.save();
+
+    return { message: 'Membre supprimé avec succès.' };
   }
 }
