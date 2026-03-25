@@ -217,6 +217,56 @@ if (!isPrivileged && !isOwner) {
     this.memberService.softDeleteBySignalement(objectId, now),
   ]);
 }
+  async updateSignalement(
+    id: string,
+    updateData: UpdateSignalementDto,
+    currentUser: any,
+    newFiles?: Express.Multer.File[]
+  ) {
+    const signalement = await this.signalementModel.findOne({ _id: id, isDeleted: false });
+    if (!signalement) {
+      throw new NotFoundException('Signalement non trouvé');
+    }
+
+    if (signalement.reportedBy.toString() !== currentUser.id) {
+      throw new ForbiddenException("Vous n'avez pas accès de modifier un signalement qui n'est pas le vôtre");
+    }
+
+    const allowedStatus = [StatutSignalement.NOUVEAU, StatutSignalement.EN_COURS];
+    if (!allowedStatus.includes(signalement.status)) {
+      throw new BadRequestException(`Modification impossible pour un signalement avec le statut "${signalement.status}"`);
+    }
+
+    const objectId = new Types.ObjectId(id);
+    const { members, deletedMemberIds, deletedPreuveIds, ...signalementUpdates } = updateData;
+
+    const promises: Promise<any>[] = [
+      this.signalementModel.findByIdAndUpdate(
+        objectId,
+        { $set: signalementUpdates },
+        { new: true }
+      ).lean(),
+    ];
+
+    // 1. Synchronisation des membres
+    if (members || (deletedMemberIds && deletedMemberIds.length > 0)) {
+      promises.push(this.memberService.synchronizeMembers(objectId, members, deletedMemberIds));
+    }
+
+    // 2. Suppression des preuves existantes
+    if (deletedPreuveIds && deletedPreuveIds.length > 0) {
+      promises.push(this.preuveService.softDeleteMany(deletedPreuveIds, objectId));
+    }
+
+    // 3. Ajout de nouvelles preuves (fichiers)
+    if (newFiles && newFiles.length > 0) {
+      promises.push(this.preuveService.createManyFromUploadedFiles(newFiles, id));
+    }
+
+    const [updatedSignalement] = await Promise.all(promises);
+
+    return updatedSignalement;
+  }
  
 
 

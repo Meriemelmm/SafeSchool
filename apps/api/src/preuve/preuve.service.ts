@@ -1,10 +1,10 @@
-import { Injectable, BadRequestException, InternalServerErrorException ,ForbiddenException,NotFoundException} from '@nestjs/common';
+import { Injectable, BadRequestException, InternalServerErrorException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as fs from 'fs';
 import { Preuve, PreuveDocument } from './schemas/preuve.schema';
-import { TypeEpreuve,UserRole,StatutSignalement } from '@shared/enums';
-import { Signalement ,SignalementDocument} from '@/signalement/schemas/signalement.schema';
+import { TypeEpreuve, UserRole, StatutSignalement } from '@shared/enums';
+import { Signalement, SignalementDocument } from '@/signalement/schemas/signalement.schema';
 
 @Injectable()
 export class PreuveService {
@@ -12,7 +12,7 @@ export class PreuveService {
 
   constructor(
     @InjectModel(Preuve.name) private preuveModel: Model<PreuveDocument>,
-     @InjectModel(Signalement.name) private signalementModel: Model<SignalementDocument>,
+    @InjectModel(Signalement.name) private signalementModel: Model<SignalementDocument>,
   ) {
     if (!fs.existsSync(this.uploadPath)) {
       fs.mkdirSync(this.uploadPath, { recursive: true });
@@ -27,7 +27,7 @@ export class PreuveService {
       this.cleanupFiles(files);
       throw new BadRequestException('ID de signalement invalide');
     }
-    console.log(" files",files);
+    console.log(" files", files);
 
     try {
       const proofs = files.map((file) => {
@@ -78,7 +78,7 @@ export class PreuveService {
       isDeleted: false,
     };
 
-    if (currentUser.role===UserRole.STUDENT ||currentUser.role===UserRole.PARENT) {
+    if (currentUser.role === UserRole.STUDENT || currentUser.role === UserRole.PARENT) {
       signalementQuery.reportedBy = currentUser.id;
     }
 
@@ -101,68 +101,97 @@ export class PreuveService {
     };
   }
 
-async deletePreuve(id: Types.ObjectId, currentUser): Promise<{ message: string }> {
+  async deletePreuve(id: Types.ObjectId, currentUser): Promise<{ message: string }> {
 
-  // ── Règle 1 : Preuve existe et non supprimée ──────────────
-  const preuve = await this.preuveModel.findOne({ 
-    _id: id, 
-    isDeleted: false 
-  });
+    // ── Règle 1 : Preuve existe et non supprimée ──────────────
+    const preuve = await this.preuveModel.findOne({
+      _id: id,
+      isDeleted: false
+    });
 
-  if (!preuve) {
-    throw new NotFoundException(`Preuve avec l'ID "${id}" introuvable ou déjà supprimée.`);
+    if (!preuve) {
+      throw new NotFoundException(`Preuve avec l'ID "${id}" introuvable ou déjà supprimée.`);
+    }
+
+    // ── Règle 2 : Signalement appartient à l'user ─────────────
+    const signalement = await this.signalementModel.findOne({
+      _id: preuve.signalementId,
+      reportedBy: currentUser.id,
+      isDeleted: false,
+    });
+
+    if (!signalement) {
+      throw new ForbiddenException(`Vous n'êtes pas autorisé à supprimer cette preuve.`);
+    }
+
+
+    const STATUTS_BLOQUES = [
+      StatutSignalement.RESOLU,
+      StatutSignalement.REJETE,
+      StatutSignalement.EN_INVESTIGATION,
+      StatutSignalement.ESCALADE,
+    ];
+
+    if (STATUTS_BLOQUES.includes(signalement.status)) {
+      throw new BadRequestException(
+        `Impossible de supprimer une preuve d'un signalement avec le statut "${signalement.status}".`
+      );
+    }
+
+
+    const filename = preuve.fileUrl.split('/').pop();
+    const filePath = `${this.uploadPath}/${filename}`;
+
+    if (fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch (error) {
+        console.error(`Erreur suppression fichier ${filePath}:`, error);
+      }
+    }
+
+    preuve.isDeleted = true;
+    preuve.deletedAt = new Date();
+    await preuve.save();
+
+    return { message: 'Preuve supprimée avec succès.' };
   }
-  
-  // ── Règle 2 : Signalement appartient à l'user ─────────────
-  const signalement = await this.signalementModel.findOne({
-    _id: preuve.signalementId,  
-    reportedBy: currentUser.id,         
-    isDeleted: false,
-  });
 
-  if (!signalement) {
-    throw new ForbiddenException(`Vous n'êtes pas autorisé à supprimer cette preuve.`);
+  async softDeleteMany(ids: string[], signalementId: Types.ObjectId): Promise<void> {
+    if (!ids || ids.length === 0) return;
+
+    const preuves = await this.preuveModel.find({
+      _id: { $in: ids },
+      signalementId,
+      isDeleted: false,
+    });
+
+    for (const preuve of preuves) {
+      const filename = preuve.fileUrl.split('/').pop();
+      const filePath = `${this.uploadPath}/${filename}`;
+
+      if (fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+        } catch (error) {
+          console.error(`Erreur suppression fichier ${filePath}:`, error);
+        }
+      }
+    }
+
+    await this.preuveModel.updateMany(
+      { _id: { $in: ids }, signalementId },
+      { $set: { isDeleted: true, deletedAt: new Date() } }
+    ).exec();
   }
 
-
-  const STATUTS_BLOQUES = [
-    StatutSignalement.RESOLU,
-    StatutSignalement.REJETE,
-    StatutSignalement.EN_INVESTIGATION,
-    StatutSignalement.ESCALADE,
-  ];
-
-  if (STATUTS_BLOQUES.includes(signalement.status)) {
-    throw new BadRequestException(
-      `Impossible de supprimer une preuve d'un signalement avec le statut "${signalement.status}".`
+  async softDeleteBySignalement(
+    signalementId: Types.ObjectId,
+    deletedAt: Date,
+  ): Promise<void> {
+    await this.preuveModel.updateMany(
+      { signalementId, isDeleted: false },
+      { isDeleted: true, deletedAt },
     );
   }
-
- 
-  const filename = preuve.fileUrl.split('/').pop();
-  const filePath = `${this.uploadPath}/${filename}`;
-
-  if (fs.existsSync(filePath)) {
-    try {
-      fs.unlinkSync(filePath);
-    } catch (error) {
-      console.error(`Erreur suppression fichier ${filePath}:`, error);
-    }
-  }
-
-  preuve.isDeleted = true;
-  preuve.deletedAt = new Date();
-  await preuve.save();
-
-  return { message: 'Preuve supprimée avec succès.' };
-}
- async softDeleteBySignalement(
-  signalementId: Types.ObjectId,
-  deletedAt: Date,
-): Promise<void> {
-  await this.preuveModel.updateMany(
-    { signalementId, isDeleted: false },
-    { isDeleted: true, deletedAt },
-  );
-}
 }

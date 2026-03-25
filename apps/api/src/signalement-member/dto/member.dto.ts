@@ -7,7 +7,8 @@ import {
   IsMongoId,
   ArrayNotEmpty,
   MinLength,
-  MaxLength
+  MaxLength,
+  IsOptional
 } from "class-validator";
 import { Type } from "class-transformer";
 import { RoleIncident } from "@shared/enums";
@@ -44,4 +45,10 @@ export class AddMembersDto {
   @ValidateNested({ each: true })
   @Type(() => CreateMemberDto)
   members: CreateMemberDto[];
+}
+
+export class UpdateMemberDto extends CreateMemberDto {
+  @IsOptional()
+  @IsMongoId({ message: "L'ID du membre doit être un MongoId valide." })
+  _id?: string;
 }

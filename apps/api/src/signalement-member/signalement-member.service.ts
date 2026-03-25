@@ -11,9 +11,9 @@ export class SignalementMemberService {
   constructor(
     @InjectModel(SignalementMember.name) private memberModel: Model<SignalementMemberDocument>,
     @InjectModel(Signalement.name) private signalementModel: Model<SignalementDocument>,
-  ) {}
+  ) { }
 
- async createMany(
+  async createMany(
     members: CreateMemberDto[],
     signalementId: string
   ): Promise<SignalementMemberDocument[]> {
@@ -24,12 +24,12 @@ export class SignalementMemberService {
       ...member,
       signalementId: objectId,
     }));
-    
+
 
     return this.memberModel.insertMany(membersWithSignalement);
   }
 
- 
+
 
   async findMembersBySignalment(id: string, currentUser: { id: string; role: UserRole }) {
     const isAdminOrTeacher =
@@ -43,7 +43,7 @@ export class SignalementMemberService {
     if (!isAdminOrTeacher) {
       signalementQuery.reportedBy = currentUser.id;
     }
-   
+
 
     const signalement = await this.signalementModel.findOne(signalementQuery).lean();
 
@@ -56,14 +56,14 @@ export class SignalementMemberService {
         { signalementId: id },
         { signalementId: new Types.ObjectId(id) }
       ],
-      isDeleted: { $ne: true }, 
+      isDeleted: { $ne: true },
     }).exec();
 
     return members;
   }
 
   async deleteMember(id: Types.ObjectId, currentUser: { id: Types.ObjectId; role: UserRole }): Promise<{ message: string }> {
-   
+
     const member = await this.memberModel.findOne({
       _id: id,
       isDeleted: { $ne: true }
@@ -83,7 +83,7 @@ export class SignalementMemberService {
       throw new ForbiddenException(`Vous n'êtes pas autorisé à supprimer ce membre.`);
     }
 
-    
+
     const STATUTS_BLOQUES = [
       StatutSignalement.RESOLU,
       StatutSignalement.REJETE,
@@ -97,20 +97,65 @@ export class SignalementMemberService {
       );
     }
 
-  
+
     member.isDeleted = true;
     member.deletedAt = new Date();
     await member.save();
 
     return { message: 'Membre supprimé avec succès.' };
   }
-   async softDeleteBySignalement(
-  signalementId: Types.ObjectId,
-  deletedAt: Date,
-): Promise<void> {
-  await this.memberModel.updateMany(
-    { signalementId, isDeleted: false },
-    { isDeleted: true, deletedAt },
-  );
-}
+
+  async synchronizeMembers(
+    signalementId: Types.ObjectId,
+    members: UpdateMemberDto[] = [],
+    deletedIds: string[] = []
+  ): Promise<void> {
+    const promises: Promise<any>[] = [];
+
+    // 1. Gérer les suppressions
+    if (deletedIds && deletedIds.length > 0) {
+      promises.push(
+        this.memberModel.updateMany(
+          { _id: { $in: deletedIds }, signalementId },
+          { $set: { isDeleted: true, deletedAt: new Date() } }
+        ).exec()
+      );
+    }
+
+    // 2. Gérer les ajouts et modifications
+    if (members && members.length > 0) {
+      for (const memberData of members) {
+        if (memberData._id) {
+          // Mise à jour
+          const { _id, ...updateFields } = memberData;
+          promises.push(
+            this.memberModel.updateOne(
+              { _id: new Types.ObjectId(_id), signalementId, isDeleted: false },
+              { $set: updateFields }
+            ).exec()
+          );
+        } else {
+          // Création
+          promises.push(
+            this.memberModel.create({
+              ...memberData,
+              signalementId,
+            })
+          );
+        }
+      }
+    }
+
+    await Promise.all(promises);
+  }
+
+  async softDeleteBySignalement(
+    signalementId: Types.ObjectId,
+    deletedAt: Date,
+  ): Promise<void> {
+    await this.memberModel.updateMany(
+      { signalementId, isDeleted: false },
+      { isDeleted: true, deletedAt },
+    );
+  }
 }
