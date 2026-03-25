@@ -1,4 +1,4 @@
-import { Controller, Post, Body,Delete, UseGuards, Req, Get, Query, Param, Patch } from '@nestjs/common';
+import { Controller, Post, Body,Delete, UseGuards, Req, Get, Query, Param, Patch, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { SignalementService } from './signalement.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { CreateSignalementDto } from '@/signalement/dto/createsignalement.dto';
@@ -9,6 +9,8 @@ import { UserRole, StatutSignalement } from '@shared/enums';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Types } from 'mongoose';
 import {ParseObjectIdPipe} from '@/common/pipes/parse-object-id.pipe';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from '@/common/upload.config';
 
 
 @Controller('signalement')
@@ -53,14 +55,27 @@ export class SignalementController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
- 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PARENT, UserRole.STUDENT)
+  @UseInterceptors(FilesInterceptor('files', 10, multerConfig))
+  async update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() body: UpdateSignalementDto,
+    @CurrentUser() currentUser,
+    @UploadedFiles() files: Express.Multer.File[]
+  ) {
+    const signalement = await this.signalementService.updateSignalement(id, body, currentUser, files);
+    return {
+      message: 'Signalement mis à jour avec succès',
+      data: signalement,
+    };
+  }
 
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.TEACHER)
   async updateStatus(
-    @Param('id') id: Types.ObjectId,
+    @Param('id', ParseObjectIdPipe) id: Types.ObjectId,
     @Body('status') status: StatutSignalement,
   ) {
     const updated = await this.signalementService.updateStatusSignalement(
