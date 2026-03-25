@@ -1,12 +1,14 @@
-import { Controller, Post, Body, UseGuards, Req, Get,Query,Param,Patch } from '@nestjs/common';
+import { Controller, Post, Body,Delete, UseGuards, Req, Get, Query, Param, Patch } from '@nestjs/common';
 import { SignalementService } from './signalement.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { CreateSignalementDto } from '@/signalement/dto/createsignalement.dto';
+import { UpdateSignalementDto } from '@/signalement/dto/updateSignalement.dto';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { UserRole,StatutSignalement } from '@shared/enums';
+import { UserRole, StatutSignalement } from '@shared/enums';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Types } from 'mongoose';
+import {ParseObjectIdPipe} from '@/common/pipes/parse-object-id.pipe';
 
 
 @Controller('signalement')
@@ -31,13 +33,14 @@ export class SignalementController {
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.TEACHER)
- async findAll(@Query() query) {
-  const result = await this.signalementService.findAll(query);
-  return {
-    message: 'Liste des signalements récupérée avec succès',
-    ...result,
-  };
-}
+  async findAll(@Query() query) {
+    const result = await this.signalementService.findAll(query);
+    return {
+      message: 'Liste des signalements récupérée avec succès',
+      ...result,
+    };
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string, @CurrentUser() currentUser) {
@@ -48,22 +51,40 @@ export class SignalementController {
       data: signalement,
     };
   }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+ 
+
   @Patch(':id/status')
-  @UseGuards(JwtAuthGuard,RolesGuard)
-  @Roles(UserRole.ADMIN,UserRole.TEACHER)
-    async updateStatus(  @Param('id') id: Types.ObjectId,
-  @Body('status') status: StatutSignalement,
-){
-       const updated = await this.signalementService.updateStatusSignalement(
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  async updateStatus(
+    @Param('id') id: Types.ObjectId,
+    @Body('status') status: StatutSignalement,
+  ) {
+    const updated = await this.signalementService.updateStatusSignalement(
+      id,
+      status
+    );
+    return {
+      message: "Statut mis à jour avec succès",
+      data: updated,
+    };
+  }
+  @Delete(':id')
+@UseGuards(JwtAuthGuard)
+async delete(
+  @Param('id', ParseObjectIdPipe) id: string,
+  @CurrentUser() CurrentUser,
+): Promise<{ message: string }> {
+
+  await this.signalementService.deleteSignalement(
     id,
-    status
-    
+    CurrentUser.id,
+    CurrentUser.role
   );
-  return {
-    message: "Statut mis à jour avec succès",
-    data: updated,
-  };
 
-    }
-
+  return { message: 'Signalement deleted successfully' };
+}
 }
