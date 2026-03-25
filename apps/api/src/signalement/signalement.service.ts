@@ -1,15 +1,22 @@
-import { Injectable, NotFoundException,BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException ,ForbiddenException} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Signalement, SignalementDocument } from '@/signalement/schemas/signalement.schema';
 import { CreateSignalementDto } from '@/signalement/dto/createsignalement.dto';
+import { UpdateSignalementDto } from '@/signalement/dto/updateSignalement.dto';
 import { Nature, StatutSignalement, TypeViolence, UserRole } from '@shared/enums';
+import { SignalementMemberService } from '@/signalement-member/signalement-member.service';
+import { PreuveService } from '@/preuve/preuve.service';
+
+
 
 
 @Injectable()
 export class SignalementService {
   constructor(
     @InjectModel(Signalement.name) private signalementModel: Model<SignalementDocument>,
+    private readonly memberService: SignalementMemberService,
+    private readonly preuveService:PreuveService,
   ) { }
 
   async create(createSignalementDto: CreateSignalementDto, userId: Types.ObjectId): Promise<SignalementDocument> {
@@ -84,7 +91,7 @@ export class SignalementService {
       isDeleted: false,
     };
 
-    // If student or parent, they can only see their own signalement
+    
     if (!isAdminOrTeacher) {
       query.reportedBy = currentUser.id;
     }
@@ -112,73 +119,105 @@ export class SignalementService {
     };
   }
   async updateStatusSignalement(
-  id: Types.ObjectId,
-  newStatus: StatutSignalement,
- 
-) {
-  
+    id: Types.ObjectId,
+    newStatus: StatutSignalement,
+
+  ) {
 
 
-  
 
+
+
+    const signalement = await this.signalementModel.findOne({
+      _id: id,
+      isDeleted: false,
+    }).lean();
+
+    if (!signalement) {
+      throw new NotFoundException(
+        `Signalement avec l'ID "${id}" introuvable.`
+      );
+    }
+
+
+    if (signalement.status === newStatus) {
+      throw new BadRequestException(
+        `Le signalement a déjà le statut "${newStatus}".`
+      );
+    }
+
+
+    const transitions: Record<StatutSignalement, StatutSignalement[]> = {
+      [StatutSignalement.NOUVEAU]: [
+        StatutSignalement.EN_COURS,
+        StatutSignalement.REJETE,
+      ],
+      [StatutSignalement.EN_COURS]: [
+        StatutSignalement.EN_INVESTIGATION,
+        StatutSignalement.RESOLU,
+        StatutSignalement.REJETE,
+        StatutSignalement.ESCALADE,
+      ],
+      [StatutSignalement.EN_INVESTIGATION]: [
+        StatutSignalement.RESOLU,
+        StatutSignalement.REJETE,
+        StatutSignalement.ESCALADE,
+      ],
+      [StatutSignalement.ESCALADE]: [
+        StatutSignalement.EN_INVESTIGATION,
+        StatutSignalement.RESOLU,
+        StatutSignalement.REJETE,
+      ],
+      [StatutSignalement.RESOLU]: [],
+      [StatutSignalement.REJETE]: [],
+    };
+
+    const allowedTransitions = transitions[signalement.status];
+
+    if (!allowedTransitions.includes(newStatus)) {
+      throw new BadRequestException(
+        `Transition invalide : "${signalement.status}" → "${newStatus}" non autorisée.`
+      );
+    }
+
+    const updated = await this.signalementModel.findByIdAndUpdate(
+      id,
+      { $set: { status: newStatus } },
+      { new: true }
+    ).lean();
+
+    return updated;
+  }
+
+async deleteSignalement(id: string, deletedByUserId: string, userRole: UserRole): Promise<void> {
   const signalement = await this.signalementModel.findOne({
     _id: id,
     isDeleted: false,
-  }).lean();
+  });
 
   if (!signalement) {
-    throw new NotFoundException(
-      `Signalement avec l'ID "${id}" introuvable.`
-    );
+    throw new NotFoundException(`Signalement ${id} introuvable ou déjà supprimé.`);
   }
+  const isPrivileged = [UserRole.ADMIN, UserRole.TEACHER].includes(userRole);
+const isOwner = signalement.reportedBy.toString() === deletedByUserId;
 
-
-  if (signalement.status === newStatus) {
-    throw new BadRequestException(
-      `Le signalement a déjà le statut "${newStatus}".`
-    );
-  }
-
-
-  const transitions: Record<StatutSignalement, StatutSignalement[]> = {
-    [StatutSignalement.NOUVEAU]: [
-      StatutSignalement.EN_COURS,
-      StatutSignalement.REJETE,
-    ],
-    [StatutSignalement.EN_COURS]: [
-      StatutSignalement.EN_INVESTIGATION,
-      StatutSignalement.RESOLU,
-      StatutSignalement.REJETE,
-      StatutSignalement.ESCALADE,
-    ],
-    [StatutSignalement.EN_INVESTIGATION]: [
-      StatutSignalement.RESOLU,
-      StatutSignalement.REJETE,
-      StatutSignalement.ESCALADE,
-    ],
-    [StatutSignalement.ESCALADE]: [
-      StatutSignalement.EN_INVESTIGATION,
-      StatutSignalement.RESOLU,
-      StatutSignalement.REJETE,
-    ],
-    [StatutSignalement.RESOLU]: [],  
-    [StatutSignalement.REJETE]: [],   
-  };
-
-  const allowedTransitions = transitions[signalement.status];
-
-  if (!allowedTransitions.includes(newStatus)) {
-    throw new BadRequestException(
-      `Transition invalide : "${signalement.status}" → "${newStatus}" non autorisée.`
-    );
-  }
-
-  const updated = await this.signalementModel.findByIdAndUpdate(
-    id,
-    { $set: { status: newStatus } },
-    { new: true }
-  ).lean();
-
-  return updated;
+if (!isPrivileged && !isOwner) {
+  throw new ForbiddenException(`Vous n'êtes pas autorisé à supprimer ce signalement.`);
 }
+
+  const now = new Date();
+  const objectId = new Types.ObjectId(id);
+
+  await Promise.all([
+    this.signalementModel.updateOne(
+      { _id: objectId },
+      { isDeleted: true, deletedAt: now, deletedBy: new Types.ObjectId(deletedByUserId) },
+    ),
+    this.preuveService.softDeleteBySignalement(objectId, now),
+    this.memberService.softDeleteBySignalement(objectId, now),
+  ]);
+}
+ 
+
+
 }

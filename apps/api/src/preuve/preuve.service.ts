@@ -156,4 +156,13 @@ async deletePreuve(id: Types.ObjectId, currentUser): Promise<{ message: string }
 
   return { message: 'Preuve supprimée avec succès.' };
 }
+ async softDeleteBySignalement(
+  signalementId: Types.ObjectId,
+  deletedAt: Date,
+): Promise<void> {
+  await this.preuveModel.updateMany(
+    { signalementId, isDeleted: false },
+    { isDeleted: true, deletedAt },
+  );
+}
 }

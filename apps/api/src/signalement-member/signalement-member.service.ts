@@ -104,4 +104,13 @@ export class SignalementMemberService {
 
     return { message: 'Membre supprimé avec succès.' };
   }
+   async softDeleteBySignalement(
+  signalementId: Types.ObjectId,
+  deletedAt: Date,
+): Promise<void> {
+  await this.memberModel.updateMany(
+    { signalementId, isDeleted: false },
+    { isDeleted: true, deletedAt },
+  );
+}
 }
