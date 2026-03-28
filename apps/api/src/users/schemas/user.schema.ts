@@ -10,8 +10,8 @@ export class StudentProfile {
   @Prop({ type: Types.ObjectId, ref: 'Etablissement', required: false })
   etablissementId?: Types.ObjectId;
 
-  @Prop({ required: true, trim: true })
-  numeroScolaire: string;
+  // @Prop({ required: false, trim: true })
+  // numeroScolaire: string;
 
   @Prop({ required: false, trim: true })
   classe?: string;
@@ -20,8 +20,7 @@ export class StudentProfile {
 @Schema({ _id: false })
 export class ParentProfile {
  
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
-  childrenIds: Types.ObjectId[];
+ 
 
   @Prop({
     required: true,

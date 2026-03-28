@@ -20,9 +20,9 @@ export class StudentProfileDto {
   @IsMongoId({ message: 'L\'ID de l\'établissement doit être valide' })
   etablissementId?: string;
 
-  @IsNotEmpty({ message: 'Le numéro scolaire est obligatoire pour un élève' })
-  @IsString()
-  numeroScolaire: string;
+  // @IsNotEmpty({ message: 'Le numéro scolaire est obligatoire pour un élève' })
+  // @IsString({ message: 'Le numéro scolaire doit être une chaîne de caractères' })
+  // numeroScolaire: string;
 
   @IsOptional()
   @IsString()
@@ -30,10 +30,7 @@ export class StudentProfileDto {
 }
 
 export class ParentProfileDto {
-  @IsOptional()
-  @IsArray()
-  @IsMongoId({ each: true, message: 'Les IDs des enfants doivent être valides' })
-  childrenIds?: string[];
+
 
   @IsNotEmpty({ message: 'La relation est obligatoire pour un parent' })
   @IsIn(['père', 'mère', 'tuteur', 'autre'], { message: 'Relation invalide' })
@@ -115,7 +112,7 @@ export class UserDto {
         return AdminProfileDto;
       default:
         // Par défaut, aucun sous-objet n'est attendu si le rôle n'est pas reconnu
-        return class {};
+        return class { };
     }
   })
   profileData?: StudentProfileDto | ParentProfileDto | TeacherProfileDto | AdminProfileDto;

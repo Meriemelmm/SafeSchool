@@ -14,31 +14,42 @@ import * as crypto from 'crypto';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-   
-  ) {}
 
-  @UseGuards(JwtAuthGuard,RolesGuard)
+  ) { }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-   @Post()
+  @Post()
 
-async createByAdmin(@Body() userData: UserDto) {
-  const newUser = await this.usersService.createByAdmin(userData);  
-  return {
-    message: "User created successfully",  
-    data: newUser
+  async createByAdmin(@Body() userData: UserDto) {
+    const newUser = await this.usersService.createByAdmin(userData);
+    return {
+      message: "User created successfully",
+      data: newUser
+    }
   }
-}
   @Roles(UserRole.ADMIN)
   @Get()
   async findAll(@Query() query) {
-    const { skip, limit, ...filter } = query;
+    const { skip, limit, search, role, status } = query;
     
-    const finalFilter = { isDeleted: { $ne: true }, ...filter };
+    const filter: any = { isDeleted: { $ne: true } };
+    
+    if (search) {
+      filter.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+    
+    if (role) filter.role = role;
+    if (status) filter.status = status;
     
     const result = await this.usersService.findAll(
-      finalFilter,
-      skip ? parseInt(skip, 10) : 0,
-      limit ? parseInt(limit, 10) : 10
+      filter,
+      parseInt(skip) || 0,
+      parseInt(limit) || 10
     );
     
     return {
@@ -65,5 +76,5 @@ async createByAdmin(@Body() userData: UserDto) {
 
 
 
-  
+
 }
