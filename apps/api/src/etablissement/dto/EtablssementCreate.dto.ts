@@ -39,4 +39,7 @@ export class CreateEtablissementDto {
   @IsEmail({}, { message: 'Email invalide' })
   @IsOptional()                    
   email?: string;
+
+  @IsOptional()
+  isActive?: boolean;
 }
