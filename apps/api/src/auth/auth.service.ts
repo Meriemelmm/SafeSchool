@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { UserDocument } from '../users/schemas/user.schema';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { RegisterDto } from '@/auth/dto/register.dto';
 import { LoginDto } from '@/auth/dto/login.dto';
 
@@ -62,6 +62,17 @@ export class AuthService {
     return {
       ...tokens,
       user: this.usersService.sanitizeUser(user)
+    };
+  }
+
+  // ─── Profile ──────────────────────────────────────────────────────────────────
+  async profile(user: any) {
+    const fullUser = await this.usersService.findById(user.id);
+    if (!fullUser) {
+      throw new UnauthorizedException('User not found');
+    }
+    return {
+      user: this.usersService.sanitizeUser(fullUser)
     };
   }
 }

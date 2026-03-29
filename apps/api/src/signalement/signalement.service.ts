@@ -31,12 +31,12 @@ export class SignalementService {
     const { status, nature, typeViolence, page = 1, limit = 10, search } = filter;
 
     const query: {
-      isDeleted: boolean;
+      isDeleted?: boolean | { $ne: true };
       status?: StatutSignalement;
       nature?: Nature;
       typeViolence?: TypeViolence;
       $or?: object[];
-    } = { isDeleted: false };
+    } = { isDeleted: { $ne: true } };
 
     if (status) query.status = status;
     if (nature) query.nature = nature;
@@ -88,7 +88,7 @@ export class SignalementService {
 
     const query: any = {
       _id: id,
-      isDeleted: false,
+      isDeleted: { $ne: true },
     };
 
     
@@ -130,7 +130,7 @@ export class SignalementService {
 
     const signalement = await this.signalementModel.findOne({
       _id: id,
-      isDeleted: false,
+      isDeleted: { $ne: true },
     }).lean();
 
     if (!signalement) {
@@ -192,7 +192,7 @@ export class SignalementService {
 async deleteSignalement(id: string, deletedByUserId: string, userRole: UserRole): Promise<void> {
   const signalement = await this.signalementModel.findOne({
     _id: id,
-    isDeleted: false,
+    isDeleted: { $ne: true },
   });
 
   if (!signalement) {
@@ -223,7 +223,7 @@ if (!isPrivileged && !isOwner) {
     currentUser: any,
     newFiles?: Express.Multer.File[]
   ) {
-    const signalement = await this.signalementModel.findOne({ _id: id, isDeleted: false });
+    const signalement = await this.signalementModel.findOne({ _id: id, isDeleted: { $ne: true } });
     if (!signalement) {
       throw new NotFoundException('Signalement non trouvé');
     }

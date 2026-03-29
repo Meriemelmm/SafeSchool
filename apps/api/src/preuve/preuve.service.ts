@@ -95,10 +95,7 @@ export class PreuveService {
       isDeleted: false,
     }).lean();
 
-    return {
-      signalementId: id,
-      preuves,
-    };
+    return preuves;
   }
 
   async deletePreuve(id: Types.ObjectId, currentUser): Promise<{ message: string }> {
