@@ -1,6 +1,8 @@
 import api from '../api';
 import { IPaginatedSignalements, ISignalement, ISignalementDetail } from 'shared/interfaces/signalement.interface';
 import { StatutSignalement } from 'shared/enums/signalement-enums';
+import { MemberFormData } from '@/components/signalement/create/types';
+import {SignalementFormData } from '@/components/signalement/create/types'
 
 
 export interface SignalementFilters {
@@ -31,6 +33,29 @@ export const signalementService = {
 
   async updateStatus(id: string, status: StatutSignalement) {
     const response = await api.patch<{ message: string, data: ISignalement }>(`/signalement/${id}/status`, { status });
+    return response.data;
+  },
+
+  async create(data:SignalementFormData) {
+    const response = await api.post<{ message: string, data: ISignalement }>('/signalement', data);
+    return response.data;
+  },
+
+  async update(id: string, data: any) {
+    const response = await api.patch<{ message: string, data: ISignalement }>(`/signalement/${id}`, data);
+    return response.data;
+  },
+
+  /**
+   * Attache des membres et/ou des fichiers à un signalement existant via multipart/form-data.
+   * Le Content-Type par défaut est supprimé pour qu'axios définisse le bon boundary multipart.
+   */
+ 
+
+  async getMyReports(page = 1, limit = 10) {
+    const response = await api.get<IPaginatedSignalements>('/signalement/my-reports', {
+      params: { page, limit }
+    });
     return response.data;
   },
 
