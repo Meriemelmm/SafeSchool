@@ -9,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 
 import { EtablissementModule } from './etablissement/etablissement.module';
 import { MailModule } from './mail/mail.module';
+import { SignalementModule } from './signalement/signalement.module';
+import { PreuveModule } from './preuve/preuve.module';
 
 @Module({
   imports: [
@@ -30,7 +32,7 @@ import { MailModule } from './mail/mail.module';
     }),
    
     UsersModule, 
-    AuthModule, EtablissementModule, MailModule
+    AuthModule, EtablissementModule, MailModule,SignalementModule,PreuveModule
   ],
   controllers: [AppController],
   providers: [AppService],

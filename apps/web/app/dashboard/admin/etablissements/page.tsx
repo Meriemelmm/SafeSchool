@@ -3,19 +3,21 @@ import { etablissementService } from '@/lib/services/etablissement';
 import { EtablissementTable } from '@/components/etablissement/EtablissementTable';
 import { EtablissementManagementHeader } from '@/components/etablissement/EtablissementManagementHeader';
 
+import { IEtablissement } from 'shared/index';
+
 export const metadata = {
   title: 'Gestion des Établissements | SafeSchool Admin',
   description: 'Gérez tous les établissements partenaires de la plateforme SafeSchool.',
 };
 
 export default async function AdminEtablissementsPage() {
-  let initialEtabs = [];
+  let initialEtabs: IEtablissement[] = [];
   let totalEtabs = 0;
 
   try {
     const response = await etablissementService.getAllEtablissements(1, 10);
     initialEtabs = response.data || [];
-    totalEtabs = response.total || 0;
+    totalEtabs = response.meta.total || 0;
   } catch (error) {
     console.error('Failed to pre-fetch etablissements:', error);
   }

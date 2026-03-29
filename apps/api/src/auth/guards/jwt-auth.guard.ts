@@ -12,16 +12,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
+    const tokenFromCookie = request.cookies?.token;
 
-    if (!authHeader) {
+    // Allow either Authorization header or cookie
+    if (!authHeader && !tokenFromCookie) {
       throw new UnauthorizedException({
         statusCode: 401,
         message: 'Access token is required',
-        error: 'No authorization header provided',
+        error: 'No authorization header or token cookie provided',
       });
     }
 
-    if (!authHeader.startsWith('Bearer ')) {
+    if (authHeader && !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException({
         statusCode: 401,
         message: 'Invalid authorization header format',
@@ -29,8 +31,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       });
     }
 
-    const token = authHeader.substring(7).trim();
-    
+    const token = authHeader ? authHeader.substring(7).trim() : tokenFromCookie;
+
     if (!token) {
       throw new UnauthorizedException({
         statusCode: 401,
