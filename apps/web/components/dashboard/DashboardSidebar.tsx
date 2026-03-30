@@ -31,14 +31,13 @@ const menuByRole: Record<UserRole, SidebarItem[]> = {
   ],
   student: [
     { href: "/dashboard/student", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/student/signalements", label: "My Reports", icon: FileText },
-    { href: "/dashboard/student/resources", label: "Resources", icon: BookOpen },
-    { href: "/dashboard/student/messages", label: "Messages", icon: MessageSquare },
+    { href: "/dashboard/student/signalement", label: "Mes Signalements", icon: FileText },
+    { href: "/dashboard/student/signalement/create", label: "Signaler un incident", icon: MessageSquare },
   ],
   parent: [
-    { href: "/dashboard/student", label: "Tableau de bord", icon: LayoutDashboard },
-    { href: "/dashboard/student/signalements", label: "Mes signalements", icon: FileText },
-    { href: "/dashboard/student/create", label: "Créer un signalement", icon: FileText },
+    { href: "/dashboard/parent", label: "Tableau de bord", icon: LayoutDashboard },
+    { href: "/dashboard/parent/signalement", label: "Mes Signalements", icon: FileText },
+    { href: "/dashboard/parent/signalement/create", label: "Signaler un incident", icon: MessageSquare },
   ],
 };
 

@@ -2,7 +2,7 @@ import api from '../api';
 import { IPaginatedSignalements, ISignalement, ISignalementDetail } from 'shared/interfaces/signalement.interface';
 import { StatutSignalement } from 'shared/enums/signalement-enums';
 import { MemberFormData } from '@/components/signalement/create/types';
-import {SignalementFormData } from '@/components/signalement/create/types'
+import { SignalementFormData } from '@/components/signalement/create/types'
 
 
 export interface SignalementFilters {
@@ -36,7 +36,7 @@ export const signalementService = {
     return response.data;
   },
 
-  async create(data:SignalementFormData) {
+  async create(data: SignalementFormData) {
     const response = await api.post<{ message: string, data: ISignalement }>('/signalement', data);
     return response.data;
   },
@@ -50,12 +50,16 @@ export const signalementService = {
    * Attache des membres et/ou des fichiers à un signalement existant via multipart/form-data.
    * Le Content-Type par défaut est supprimé pour qu'axios définisse le bon boundary multipart.
    */
- 
 
-  async getMyReports(page = 1, limit = 10) {
+
+  async getMyReports(page = 1, limit = 10, search?: string) {
+    const params: any = { page, limit };
+    if (search) params.search = search;
+
     const response = await api.get<IPaginatedSignalements>('/signalement/my-reports', {
-      params: { page, limit }
+      params
     });
+    console.log("singalments", response.data);
     return response.data;
   },
 
