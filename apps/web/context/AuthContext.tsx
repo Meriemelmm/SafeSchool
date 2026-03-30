@@ -2,13 +2,14 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import * as authService from '@/lib/services/auth';
+import { UserRole } from 'shared/enums';
 
 type AuthContextType = {
     user: authService.AuthUser | null;
     loading: boolean;
     error: string | null;
-    login: (email: string, password: string) => Promise<void>;
-    register: (payload: authService.RegisterPayload) => Promise<void>;
+    login: (email: string, password: string) => Promise<authService.AuthUser>;
+    register: (payload: authService.RegisterPayload) => Promise<authService.AuthUser>;
     logout: () => Promise<void>;
 };
 
@@ -42,6 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setError(null);
             const result = await authService.login({ email, password });
             setUser(result.user);
+            return result.user;
         } catch (err: any) {
             setError(err?.response?.data?.message || 'Login failed');
             throw err;
@@ -52,7 +54,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             setError(null);
             const result = await authService.register(payload);
+           
+            
             setUser(result.user);
+            return result.user;
         } catch (err: any) {
             setError(err?.response?.data?.message || 'Registration failed');
             throw err;
