@@ -2,10 +2,7 @@ const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    turbo: {
-    },
-  },
+  // Configuration vide pour l'instant
 };
 
 module.exports = nextConfig;
