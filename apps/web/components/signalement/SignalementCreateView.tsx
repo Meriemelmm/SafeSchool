@@ -133,14 +133,13 @@ export default function SignalementCreateView({ editingId, initialData, initialM
         await Promise.all(promises);
       }
 
-      // ── Redirection après succès ───────────────────────────────
       const currentPath = window.location.pathname;
       if (currentPath.includes('/student')) {
-        router.push('/dashboard/student/mes-signalements');
+        router.push('/dashboard/student/signalement');
       } else if (currentPath.includes('/parent')) {
-        router.push('/dashboard/parent/mes-signalements');
+        router.push('/dashboard/parent/signalement');
       } else {
-        router.push('/dashboard/student/mes-signalements');
+        router.push('/dashboard/student/signalement');
       }
     } catch (err: any) {
       setError(
