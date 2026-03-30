@@ -6,7 +6,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import * as bcrypt from 'bcryptjs';
 import { UserDto } from './dto/users.dto';
 import * as crypto from 'crypto';
-import { MailService } from 'src/mail/mail.service';
+import { MailService } from '@/mail/mail.service';
 
 @Injectable()
 export class UsersService {
@@ -40,7 +40,7 @@ export class UsersService {
     }
     const newUser = new this.userModel(userData);
 
-    // Mongoose ne détecte pas toujours les changements sur les types "Object" (Mixed) dynamiques.
+    
     if (userData.profileData) {
       newUser.markModified('profileData');
     }
@@ -48,9 +48,8 @@ export class UsersService {
     return newUser.save();
   }
 
-  /**
-   * Returns a plain user object with sensitive fields removed.
-   */
+  
+   
   sanitizeUser(user: UserDocument): Omit<User, 'password'> {
     const userObj = user.toObject({ virtuals: true, getters: true });
     const { password, ...sanitized } = userObj;
