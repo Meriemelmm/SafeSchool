@@ -12,6 +12,9 @@ import { MailModule } from './mail/mail.module';
 import { SignalementModule } from './signalement/signalement.module';
 import { PreuveModule } from './preuve/preuve.module';
 
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 @Module({
   imports: [
     // Load .env globally first
@@ -30,11 +33,16 @@ import { PreuveModule } from './preuve/preuve.module';
         from: process.env.FROM_EMAIL || '"SafeSchool Admin" <noreply@safeschool.com>',
       },
     }),
-   
-    UsersModule, 
-    AuthModule, EtablissementModule, MailModule,SignalementModule,PreuveModule
+
+    UsersModule,
+    AuthModule, EtablissementModule, MailModule, SignalementModule, PreuveModule,
+
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

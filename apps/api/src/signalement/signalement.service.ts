@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException ,ForbiddenException} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Signalement, SignalementDocument } from '@/signalement/schemas/signalement.schema';
@@ -16,7 +16,7 @@ export class SignalementService {
   constructor(
     @InjectModel(Signalement.name) private signalementModel: Model<SignalementDocument>,
     private readonly memberService: SignalementMemberService,
-    private readonly preuveService:PreuveService,
+    private readonly preuveService: PreuveService,
   ) { }
 
   async create(createSignalementDto: CreateSignalementDto, userId: Types.ObjectId): Promise<SignalementDocument> {
@@ -91,7 +91,7 @@ export class SignalementService {
       isDeleted: { $ne: true },
     };
 
-    
+
     if (!isAdminOrTeacher) {
       query.reportedBy = currentUser.id;
     }
@@ -189,34 +189,34 @@ export class SignalementService {
     return updated;
   }
 
-async deleteSignalement(id: string, deletedByUserId: string, userRole: UserRole): Promise<void> {
-  const signalement = await this.signalementModel.findOne({
-    _id: id,
-    isDeleted: { $ne: true },
-  });
+  async deleteSignalement(id: string, deletedByUserId: string, userRole: UserRole): Promise<void> {
+    const signalement = await this.signalementModel.findOne({
+      _id: id,
+      isDeleted: { $ne: true },
+    });
 
-  if (!signalement) {
-    throw new NotFoundException(`Signalement ${id} introuvable ou déjà supprimé.`);
+    if (!signalement) {
+      throw new NotFoundException(`Signalement ${id} introuvable ou déjà supprimé.`);
+    }
+    const isPrivileged = [UserRole.ADMIN, UserRole.TEACHER].includes(userRole);
+    const isOwner = signalement.reportedBy.toString() === deletedByUserId;
+
+    if (!isPrivileged && !isOwner) {
+      throw new ForbiddenException(`Vous n'êtes pas autorisé à supprimer ce signalement.`);
+    }
+
+    const now = new Date();
+    const objectId = new Types.ObjectId(id);
+
+    await Promise.all([
+      this.signalementModel.updateOne(
+        { _id: objectId },
+        { isDeleted: true, deletedAt: now, deletedBy: new Types.ObjectId(deletedByUserId) },
+      ),
+      this.preuveService.softDeleteBySignalement(objectId, now),
+      this.memberService.softDeleteBySignalement(objectId, now),
+    ]);
   }
-  const isPrivileged = [UserRole.ADMIN, UserRole.TEACHER].includes(userRole);
-const isOwner = signalement.reportedBy.toString() === deletedByUserId;
-
-if (!isPrivileged && !isOwner) {
-  throw new ForbiddenException(`Vous n'êtes pas autorisé à supprimer ce signalement.`);
-}
-
-  const now = new Date();
-  const objectId = new Types.ObjectId(id);
-
-  await Promise.all([
-    this.signalementModel.updateOne(
-      { _id: objectId },
-      { isDeleted: true, deletedAt: now, deletedBy: new Types.ObjectId(deletedByUserId) },
-    ),
-    this.preuveService.softDeleteBySignalement(objectId, now),
-    this.memberService.softDeleteBySignalement(objectId, now),
-  ]);
-}
   async updateSignalement(
     id: string,
     updateData: UpdateSignalementDto,
@@ -267,7 +267,54 @@ if (!isPrivileged && !isOwner) {
 
     return updatedSignalement;
   }
- 
 
+  /**
+   * Retrieve all reports created by the current user (Student or Parent)
+   */
+  async getMyReports(userId, filter: any = {}) {
+    const { page = 1, limit = 10, search, status, nature, typeViolence } = filter;
+    console.log("id de user", userId);
+    const query: any = {
+      reportedBy: userId, // Avoid explicit new Types.ObjectId if already an ObjectId or if Mongoose can cast it
+      isDeleted: { $ne: true },
+    };
+    console.log("query", query);
 
+    if (status) query.status = status;
+    if (nature) query.nature = nature;
+    if (typeViolence) query.typeViolence = typeViolence;
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [signalements, total] = await Promise.all([
+      this.signalementModel
+        .find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit))
+        .lean(),
+
+      this.signalementModel.countDocuments(query),
+    ]);
+
+    console.log("signalements", signalements);
+    return {
+      data: signalements,
+      meta: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / Number(limit)),
+        hasNextPage: Number(page) < Math.ceil(total / Number(limit)),
+        hasPrevPage: Number(page) > 1,
+      },
+    };
+  }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body,Delete, UseGuards, Req, Get, Query, Param, Patch, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Post, Body, Delete, UseGuards, Req, Get, Query, Param, Patch, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { SignalementService } from './signalement.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { CreateSignalementDto } from '@/signalement/dto/createsignalement.dto';
@@ -8,7 +8,7 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { UserRole, StatutSignalement } from '@shared/enums';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Types } from 'mongoose';
-import {ParseObjectIdPipe} from '@/common/pipes/parse-object-id.pipe';
+import { ParseObjectIdPipe } from '@/common/pipes/parse-object-id.pipe';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '@/common/upload.config';
 
@@ -29,6 +29,20 @@ export class SignalementController {
     return {
       message: 'Le signalement a été créé avec succès',
       data: signalement
+    };
+  }
+
+  @Get('my-reports')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.STUDENT, UserRole.PARENT)
+  async getMyReports(
+    @Query() query,
+    @CurrentUser() currentUser,
+  ) {
+    const result = await this.signalementService.getMyReports(currentUser.id, query);
+    return {
+      message: 'Mes signalements récupérés avec succès',
+      ...result,
     };
   }
 
@@ -88,18 +102,18 @@ export class SignalementController {
     };
   }
   @Delete(':id')
-@UseGuards(JwtAuthGuard)
-async delete(
-  @Param('id', ParseObjectIdPipe) id: string,
-  @CurrentUser() CurrentUser,
-): Promise<{ message: string }> {
+  @UseGuards(JwtAuthGuard)
+  async delete(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @CurrentUser() CurrentUser,
+  ): Promise<{ message: string }> {
 
-  await this.signalementService.deleteSignalement(
-    id,
-    CurrentUser.id,
-    CurrentUser.role
-  );
+    await this.signalementService.deleteSignalement(
+      id,
+      CurrentUser.id,
+      CurrentUser.role
+    );
 
-  return { message: 'Signalement deleted successfully' };
-}
+    return { message: 'Signalement deleted successfully' };
+  }
 }
