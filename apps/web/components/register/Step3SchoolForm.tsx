@@ -113,8 +113,20 @@ export default function Step3SchoolForm({ formData, setFormData, prevStep, setEr
 
     try {
       setLoading(true);
-      await register(payload);
-      router.push('/login');
+    const result = await register(payload);
+
+if(result?.role === UserRole.ADMIN){
+   router.push("/dashboard/admin");
+}
+else if(result?.role === UserRole.TEACHER){
+   router.push("/dashboard/teacher");
+}
+else if(result?.role === UserRole.STUDENT){
+   router.push("/dashboard/student");
+}
+else if(result?.role === UserRole.PARENT){
+   router.push("/dashboard/parent");
+}
     } catch (ex: any) {
       setError(ex?.response?.data?.message || 'Registration failed. Please check the form.');
     } finally {

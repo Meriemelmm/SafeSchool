@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { loginSchema } from '@/app/validation/login.validation';
+import { UserRole } from 'shared/enums';
 
 export default function LoginShell() {
   const router = useRouter();
@@ -38,8 +39,20 @@ export default function LoginShell() {
 
     try {
       setLoading(true);
-      await login(email, password);
-      router.push('/');
+      const result = await login(email, password) ;
+
+      if (result?.role === UserRole.ADMIN) {
+        router.push("/dashboard/admin");
+      }
+      else if (result?.role === UserRole.TEACHER) {
+        router.push("/dashboard/teacher");
+      }
+      else if (result?.role === UserRole.STUDENT) {
+        router.push("/dashboard/student");
+      }
+      else if (result?.role === UserRole.PARENT) {
+        router.push("/dashboard/parent");
+      }
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Invalid credentials.');
     } finally {
