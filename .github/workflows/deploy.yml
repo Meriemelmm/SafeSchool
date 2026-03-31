@@ -15,7 +15,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     
     steps:
-      - name: Trigger Render API Deployment - API
+      - name: trigger Render API Deployment - API
         run: |
           curl -X POST "https://api.render.com/deploy/${{ secrets.RENDER_API_SERVICE_ID }}" \
           -H "Accept: application/json" \
