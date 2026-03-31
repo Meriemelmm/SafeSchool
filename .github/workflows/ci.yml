@@ -1,0 +1,47 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+jobs:
+  lint-and-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci                          # ← changé
+
+    - name: Build Shared Package
+      run: npm run build -w packages/shared || echo "No build step for shared"
+
+    - name: Security Audit
+      run: npm audit --audit-level=high
+
+    - name: Lint Check (API)
+      run: npm run lint -w apps/api
+
+    - name: Lint Check (Web)
+      run: npm run lint -w apps/web
+
+    - name: Type-check (API)
+      run: npx tsc -p apps/api/tsconfig.json --noEmit
+
+    - name: Type-check (Web)
+      run: npx tsc -p apps/web/tsconfig.json --noEmit
+
+    - name: Build API                   
+      run: npm run build -w apps/api
+
+    - name: Build Web                      
+      run: npm run build -w apps/web
