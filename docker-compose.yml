@@ -1,0 +1,41 @@
+services:
+  # Application Backend (NestJS)
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: safeschool_api
+    ports:
+      - "3001:3001"
+    # Docker va charger toutes les variables depuis votre fichier .env
+    env_file:
+      - apps/api/.env
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    networks:
+      - safeschool_network
+
+  # Application Frontend (Next.js)
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:3001
+    container_name: safeschool_web
+    ports:
+      - "3000:3000"
+    env_file:
+      - apps/web/.env
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+    depends_on:
+      - api
+    networks:
+      - safeschool_network
+
+networks:
+  safeschool_network:
+    driver: bridge
