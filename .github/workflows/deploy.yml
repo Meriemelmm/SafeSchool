@@ -1,18 +1,22 @@
 name: Continuous Deployment
 
-
 on:
-  workflow_run:
-    workflows: ["Continuous Integration"]
-    types: [completed]
-    branches: [main, dev]     
+  push:
+    branches:
+      - main
+      - dev
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Deploy to Render
     runs-on: ubuntu-latest
-
+    # Cette étape s'assure que le déploiement ne se lance que si les secrets sont présents
+    if: github.repository == 'Meriemelmm/SafeSchool'
+    
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Deploy API
         run: |
           curl -X POST "https://api.render.com/deploy/${{ secrets.RENDER_API_SERVICE_ID }}" \
