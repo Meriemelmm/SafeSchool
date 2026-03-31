@@ -15,17 +15,17 @@ export default function Navbar() {
           </Link>
 
           {/* Navigation Links - Desktop */}
-          {/* <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-8">
             <Link href="#how-it-works" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
-              Fonctionnement
+              Comment ça marche
             </Link>
-            <Link href="#who-can-use" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+            <Link href="#community" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
               Qui peut l'utiliser ?
             </Link>
-            <Link href="#resources" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+            <Link href="#ressources" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
               Ressources
             </Link>
-          </div> */}
+          </div>
 
           {/* Auth Buttons */}
           <div className="flex items-center space-x-4">
