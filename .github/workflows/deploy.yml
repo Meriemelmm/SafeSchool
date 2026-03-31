@@ -3,25 +3,21 @@ name: Continuous Deployment
 on:
   workflow_run:
     workflows: ["Continuous Integration"]
-    types:
-      - completed
-    branches:
-      - main
-      - dev
+    types: [completed]
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    
+    runs-on: ubuntu-latest
+
     steps:
-      - name: trigger Render API Deployment - API
+      - name: Deploy API
         run: |
           curl -X POST "https://api.render.com/deploy/${{ secrets.RENDER_API_SERVICE_ID }}" \
           -H "Accept: application/json" \
           -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
-          
-      - name: Trigger Render API Deployment - Web
+
+      - name: Deploy Web
         run: |
           curl -X POST "https://api.render.com/deploy/${{ secrets.RENDER_WEB_SERVICE_ID }}" \
           -H "Accept: application/json" \
