@@ -42,7 +42,7 @@ api.interceptors.response.use(
     if (error.response) {
 
       if (error.response.status === 401) {
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+        if (typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard')) {
           window.location.href = '/login';
         }
       }
