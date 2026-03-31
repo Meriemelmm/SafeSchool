@@ -1,15 +1,12 @@
 // etablissement.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import {EtablissementType } from '@shared/enums';
+import { EtablissementType } from '@shared/enums';
 
 export type EtablissementDocument = HydratedDocument<Etablissement>;
 
-
-
 @Schema({ timestamps: true })
 export class Etablissement {
-
   @Prop({ required: true, trim: true })
   nom: string;
 
@@ -26,7 +23,7 @@ export class Etablissement {
     trim: true,
     index: true,
   })
-  code: string; 
+  code: string;
 
   @Prop({
     type: String,
@@ -44,12 +41,10 @@ export class Etablissement {
   @Prop({ default: true })
   isActive: boolean;
   @Prop({ default: false })
-isDeleted: boolean;  
+  isDeleted: boolean;
 
-@Prop({ type: Date, default: null })
-deletedAt: Date | null; 
+  @Prop({ type: Date, default: null })
+  deletedAt: Date | null;
 }
 
-
-export const EtablissementSchema =
-  SchemaFactory.createForClass(Etablissement);
+export const EtablissementSchema = SchemaFactory.createForClass(Etablissement);

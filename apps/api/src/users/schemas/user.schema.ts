@@ -1,4 +1,3 @@
-
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { UserRole } from '@shared/index';
@@ -19,9 +18,6 @@ export class StudentProfile {
 
 @Schema({ _id: false })
 export class ParentProfile {
- 
- 
-
   @Prop({
     required: true,
     trim: true,
@@ -59,13 +55,24 @@ export class User {
   @Prop({ required: true, trim: true })
   lastName: string;
 
-  @Prop({ required: true, unique: true, match: /^\S+@\S+\.\S+$/, trim: true, lowercase: true })
+  @Prop({
+    required: true,
+    unique: true,
+    match: /^\S+@\S+\.\S+$/,
+    trim: true,
+    lowercase: true,
+  })
   email: string;
 
   @Prop({ required: true, minLength: 8 })
   password: string;
 
-  @Prop({ required: true, type: String, enum: UserRole, default: UserRole.STUDENT })
+  @Prop({
+    required: true,
+    type: String,
+    enum: UserRole,
+    default: UserRole.STUDENT,
+  })
   role: UserRole;
 
   @Prop({
@@ -83,7 +90,12 @@ export class User {
   status: string;
 
   @Prop({ type: Object, default: {} })
-  profileData: StudentProfile | ParentProfile | TeacherProfile | AdminProfile | Record<string, any>;
+  profileData:
+    | StudentProfile
+    | ParentProfile
+    | TeacherProfile
+    | AdminProfile
+    | Record<string, any>;
 
   @Prop({ default: false })
   agreedToTerms: boolean;
@@ -96,6 +108,3 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-
-

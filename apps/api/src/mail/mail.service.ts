@@ -36,7 +36,10 @@ L'équipe SafeSchool`,
 
       console.log(`Email envoyé avec succès à ${user.email}`);
     } catch (error) {
-      console.error(`Erreur lors de l'envoi de l'email à ${user.email}:`, error);
+      console.error(
+        `Erreur lors de l'envoi de l'email à ${user.email}:`,
+        error,
+      );
     }
   }
 }

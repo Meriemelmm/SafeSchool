@@ -15,7 +15,12 @@ export class SignalementMember {
   @Prop({ type: String, enum: RoleIncident, required: true })
   role: RoleIncident;
 
-  @Prop({ type: Types.ObjectId, ref: 'Signalement', required: true, index: true })
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Signalement',
+    required: true,
+    index: true,
+  })
   signalementId: Types.ObjectId;
   // ─── Soft delete ────────────────────────────────────────────
   @Prop({ default: false, index: true })
@@ -25,4 +30,5 @@ export class SignalementMember {
   deletedAt: Date | null;
 }
 
-export const SignalementMemberSchema = SchemaFactory.createForClass(SignalementMember);
+export const SignalementMemberSchema =
+  SchemaFactory.createForClass(SignalementMember);

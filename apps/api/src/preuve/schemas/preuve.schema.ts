@@ -12,12 +12,17 @@ export class Preuve {
   @Prop({ type: String, enum: TypeEpreuve, required: true })
   fileType: TypeEpreuve;
 
-  @Prop({ type: Types.ObjectId, ref: 'Signalement', required: true, index: true })
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Signalement',
+    required: true,
+    index: true,
+  })
   signalementId: Types.ObjectId;
 
   @Prop({ default: Date.now })
   uploadedAt: Date;
-   // ─── Soft delete ────────────────────────────────────────────
+  // ─── Soft delete ────────────────────────────────────────────
   @Prop({ default: false, index: true })
   isDeleted: boolean;
 

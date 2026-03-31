@@ -1,10 +1,23 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength, Matches, ValidateNested } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+  Matches,
+  ValidateNested,
+} from 'class-validator';
 import { UserRole } from '@shared/enums';
 import { Transform, Type } from 'class-transformer';
-import { StudentProfileDto, ParentProfileDto, TeacherProfileDto, AdminProfileDto } from '../../users/dto/users.dto';
+import {
+  StudentProfileDto,
+  ParentProfileDto,
+  TeacherProfileDto,
+  AdminProfileDto,
+} from '../../users/dto/users.dto';
 
 export class RegisterDto {
-
   @Transform(({ value }) => value?.trim())
   @IsNotEmpty({ message: 'firstName is required' })
   @IsString({ message: 'firstName must be a string' })
@@ -51,5 +64,9 @@ export class RegisterDto {
         return class {};
     }
   })
-  profileData?: StudentProfileDto | ParentProfileDto | TeacherProfileDto | AdminProfileDto;
+  profileData?:
+    | StudentProfileDto
+    | ParentProfileDto
+    | TeacherProfileDto
+    | AdminProfileDto;
 }

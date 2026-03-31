@@ -1,26 +1,39 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Signalement, SignalementDocument } from '@/signalement/schemas/signalement.schema';
+import {
+  Signalement,
+  SignalementDocument,
+} from '@/signalement/schemas/signalement.schema';
 import { CreateSignalementDto } from '@/signalement/dto/createsignalement.dto';
 import { UpdateSignalementDto } from '@/signalement/dto/updateSignalement.dto';
-import { Nature, StatutSignalement, TypeViolence, UserRole } from '@shared/enums';
+import {
+  Nature,
+  StatutSignalement,
+  TypeViolence,
+  UserRole,
+} from '@shared/enums';
 import { SignalementMemberService } from '@/signalement-member/signalement-member.service';
 import { PreuveService } from '@/preuve/preuve.service';
-
-
-
 
 @Injectable()
 export class SignalementService {
   constructor(
-    @InjectModel(Signalement.name) private signalementModel: Model<SignalementDocument>,
+    @InjectModel(Signalement.name)
+    private signalementModel: Model<SignalementDocument>,
     private readonly memberService: SignalementMemberService,
     private readonly preuveService: PreuveService,
-  ) { }
+  ) {}
 
-  async create(createSignalementDto: CreateSignalementDto, userId: Types.ObjectId): Promise<SignalementDocument> {
-
+  async create(
+    createSignalementDto: CreateSignalementDto,
+    userId: Types.ObjectId,
+  ): Promise<SignalementDocument> {
     const newSignalement = new this.signalementModel({
       ...createSignalementDto,
       reportedBy: userId,
@@ -28,7 +41,14 @@ export class SignalementService {
     return await newSignalement.save();
   }
   async findAll(filter) {
-    const { status, nature, typeViolence, page = 1, limit = 10, search } = filter;
+    const {
+      status,
+      nature,
+      typeViolence,
+      page = 1,
+      limit = 10,
+      search,
+    } = filter;
 
     const query: {
       isDeleted?: boolean | { $ne: true };
@@ -41,7 +61,6 @@ export class SignalementService {
     if (status) query.status = status;
     if (nature) query.nature = nature;
     if (typeViolence) query.typeViolence = typeViolence;
-
 
     if (search) {
       query.$or = [
@@ -84,13 +103,13 @@ export class SignalementService {
   }
   async findOne(id: string, currentUser: { id: string; role: UserRole }) {
     const isAdminOrTeacher =
-      currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.TEACHER;
+      currentUser.role === UserRole.ADMIN ||
+      currentUser.role === UserRole.TEACHER;
 
     const query: any = {
       _id: id,
       isDeleted: { $ne: true },
     };
-
 
     if (!isAdminOrTeacher) {
       query.reportedBy = currentUser.id;
@@ -108,44 +127,40 @@ export class SignalementService {
     const signalement = await dbQuery.lean();
 
     if (!signalement) {
-      throw new NotFoundException(`Signalement avec l'ID "${id}" introuvable ou vous n'avez pas la permission de le consulter.`);
+      throw new NotFoundException(
+        `Signalement avec l'ID "${id}" introuvable ou vous n'avez pas la permission de le consulter.`,
+      );
     }
 
     return {
       ...signalement,
       reportedBy: isAdminOrTeacher
-        ? (signalement.isAnonymous ? null : signalement.reportedBy)
+        ? signalement.isAnonymous
+          ? null
+          : signalement.reportedBy
         : undefined,
     };
   }
   async updateStatusSignalement(
     id: Types.ObjectId,
     newStatus: StatutSignalement,
-
   ) {
-
-
-
-
-
-    const signalement = await this.signalementModel.findOne({
-      _id: id,
-      isDeleted: { $ne: true },
-    }).lean();
+    const signalement = await this.signalementModel
+      .findOne({
+        _id: id,
+        isDeleted: { $ne: true },
+      })
+      .lean();
 
     if (!signalement) {
-      throw new NotFoundException(
-        `Signalement avec l'ID "${id}" introuvable.`
-      );
+      throw new NotFoundException(`Signalement avec l'ID "${id}" introuvable.`);
     }
-
 
     if (signalement.status === newStatus) {
       throw new BadRequestException(
-        `Le signalement a déjà le statut "${newStatus}".`
+        `Le signalement a déjà le statut "${newStatus}".`,
       );
     }
-
 
     const transitions: Record<StatutSignalement, StatutSignalement[]> = {
       [StatutSignalement.NOUVEAU]: [
@@ -176,33 +191,39 @@ export class SignalementService {
 
     if (!allowedTransitions.includes(newStatus)) {
       throw new BadRequestException(
-        `Transition invalide : "${signalement.status}" → "${newStatus}" non autorisée.`
+        `Transition invalide : "${signalement.status}" → "${newStatus}" non autorisée.`,
       );
     }
 
-    const updated = await this.signalementModel.findByIdAndUpdate(
-      id,
-      { $set: { status: newStatus } },
-      { new: true }
-    ).lean();
+    const updated = await this.signalementModel
+      .findByIdAndUpdate(id, { $set: { status: newStatus } }, { new: true })
+      .lean();
 
     return updated;
   }
 
-  async deleteSignalement(id: string, deletedByUserId: string, userRole: UserRole): Promise<void> {
+  async deleteSignalement(
+    id: string,
+    deletedByUserId: string,
+    userRole: UserRole,
+  ): Promise<void> {
     const signalement = await this.signalementModel.findOne({
       _id: id,
       isDeleted: { $ne: true },
     });
 
     if (!signalement) {
-      throw new NotFoundException(`Signalement ${id} introuvable ou déjà supprimé.`);
+      throw new NotFoundException(
+        `Signalement ${id} introuvable ou déjà supprimé.`,
+      );
     }
     const isPrivileged = [UserRole.ADMIN, UserRole.TEACHER].includes(userRole);
     const isOwner = signalement.reportedBy.toString() === deletedByUserId;
 
     if (!isPrivileged && !isOwner) {
-      throw new ForbiddenException(`Vous n'êtes pas autorisé à supprimer ce signalement.`);
+      throw new ForbiddenException(
+        `Vous n'êtes pas autorisé à supprimer ce signalement.`,
+      );
     }
 
     const now = new Date();
@@ -211,7 +232,11 @@ export class SignalementService {
     await Promise.all([
       this.signalementModel.updateOne(
         { _id: objectId },
-        { isDeleted: true, deletedAt: now, deletedBy: new Types.ObjectId(deletedByUserId) },
+        {
+          isDeleted: true,
+          deletedAt: now,
+          deletedBy: new Types.ObjectId(deletedByUserId),
+        },
       ),
       this.preuveService.softDeleteBySignalement(objectId, now),
       this.memberService.softDeleteBySignalement(objectId, now),
@@ -221,46 +246,73 @@ export class SignalementService {
     id: string,
     updateData: UpdateSignalementDto,
     currentUser: any,
-    newFiles?: Express.Multer.File[]
+    newFiles?: Express.Multer.File[],
   ) {
-    const signalement = await this.signalementModel.findOne({ _id: id, isDeleted: { $ne: true } });
+    const signalement = await this.signalementModel.findOne({
+      _id: id,
+      isDeleted: { $ne: true },
+    });
     if (!signalement) {
       throw new NotFoundException('Signalement non trouvé');
     }
 
     if (signalement.reportedBy.toString() !== currentUser.id) {
-      throw new ForbiddenException("Vous n'avez pas accès de modifier un signalement qui n'est pas le vôtre");
+      throw new ForbiddenException(
+        "Vous n'avez pas accès de modifier un signalement qui n'est pas le vôtre",
+      );
     }
 
-    const allowedStatus = [StatutSignalement.NOUVEAU, StatutSignalement.EN_COURS];
+    const allowedStatus = [
+      StatutSignalement.NOUVEAU,
+      StatutSignalement.EN_COURS,
+    ];
     if (!allowedStatus.includes(signalement.status)) {
-      throw new BadRequestException(`Modification impossible pour un signalement avec le statut "${signalement.status}"`);
+      throw new BadRequestException(
+        `Modification impossible pour un signalement avec le statut "${signalement.status}"`,
+      );
     }
 
     const objectId = new Types.ObjectId(id);
-    const { members, deletedMemberIds, deletedPreuveIds, ...signalementUpdates } = updateData;
+    const {
+      members,
+      deletedMemberIds,
+      deletedPreuveIds,
+      ...signalementUpdates
+    } = updateData;
 
     const promises: Promise<any>[] = [
-      this.signalementModel.findByIdAndUpdate(
-        objectId,
-        { $set: signalementUpdates },
-        { new: true }
-      ).lean(),
+      this.signalementModel
+        .findByIdAndUpdate(
+          objectId,
+          { $set: signalementUpdates },
+          { new: true },
+        )
+        .lean(),
     ];
 
     // 1. Synchronisation des membres
     if (members || (deletedMemberIds && deletedMemberIds.length > 0)) {
-      promises.push(this.memberService.synchronizeMembers(objectId, members, deletedMemberIds));
+      promises.push(
+        this.memberService.synchronizeMembers(
+          objectId,
+          members,
+          deletedMemberIds,
+        ),
+      );
     }
 
     // 2. Suppression des preuves existantes
     if (deletedPreuveIds && deletedPreuveIds.length > 0) {
-      promises.push(this.preuveService.softDeleteMany(deletedPreuveIds, objectId));
+      promises.push(
+        this.preuveService.softDeleteMany(deletedPreuveIds, objectId),
+      );
     }
 
     // 3. Ajout de nouvelles preuves (fichiers)
     if (newFiles && newFiles.length > 0) {
-      promises.push(this.preuveService.createManyFromUploadedFiles(newFiles, id));
+      promises.push(
+        this.preuveService.createManyFromUploadedFiles(newFiles, id),
+      );
     }
 
     const [updatedSignalement] = await Promise.all(promises);
@@ -272,13 +324,20 @@ export class SignalementService {
    * Retrieve all reports created by the current user (Student or Parent)
    */
   async getMyReports(userId, filter: any = {}) {
-    const { page = 1, limit = 10, search, status, nature, typeViolence } = filter;
-    console.log("id de user", userId);
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      status,
+      nature,
+      typeViolence,
+    } = filter;
+    console.log('id de user', userId);
     const query: any = {
       reportedBy: userId, // Avoid explicit new Types.ObjectId if already an ObjectId or if Mongoose can cast it
       isDeleted: { $ne: true },
     };
-    console.log("query", query);
+    console.log('query', query);
 
     if (status) query.status = status;
     if (nature) query.nature = nature;
@@ -304,7 +363,7 @@ export class SignalementService {
       this.signalementModel.countDocuments(query),
     ]);
 
-    console.log("signalements", signalements);
+    console.log('signalements', signalements);
     return {
       data: signalements,
       meta: {

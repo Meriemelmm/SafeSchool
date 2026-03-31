@@ -2,7 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PreuveService } from '@/preuve/preuve.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { BadRequestException, NotFoundException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import * as fs from 'fs';
 import { UserRole, StatutSignalement, TypeEpreuve } from '@shared/enums';
 
@@ -26,9 +31,9 @@ describe('PreuveService', () => {
     const query: any = Promise.resolve(result);
     query.populate = jest.fn().mockReturnThis();
     query.sort = jest.fn().mockReturnThis();
-    query.skip = jest.fn().mockReturnThis(),
-    query.limit = jest.fn().mockReturnThis(),
-    query.lean = jest.fn().mockResolvedValue(result);
+    ((query.skip = jest.fn().mockReturnThis()),
+      (query.limit = jest.fn().mockReturnThis()),
+      (query.lean = jest.fn().mockResolvedValue(result)));
     query.exec = jest.fn().mockResolvedValue(result);
     return query;
   };
@@ -49,7 +54,9 @@ describe('PreuveService', () => {
     };
 
     signalementModel = {
-      findOne: jest.fn().mockImplementation((q) => createMockQuery(mockSignalement)),
+      findOne: jest
+        .fn()
+        .mockImplementation((q) => createMockQuery(mockSignalement)),
     };
 
     // Reset FS mocks
@@ -84,7 +91,9 @@ describe('PreuveService', () => {
 
     it('should throw BadRequestException for invalid signalementId', async () => {
       const files = [{ filename: 'test.jpg', path: '/tmp/test.jpg' }] as any;
-      await expect(service.createManyFromUploadedFiles(files, 'invalid')).rejects.toThrow(BadRequestException);
+      await expect(
+        service.createManyFromUploadedFiles(files, 'invalid'),
+      ).rejects.toThrow(BadRequestException);
       expect(fs.unlinkSync).toHaveBeenCalled();
     });
 
@@ -92,21 +101,31 @@ describe('PreuveService', () => {
       const files = [
         { filename: 'img.jpg', mimetype: 'image/jpeg', path: '/tmp/img.jpg' },
         { filename: 'vid.mp4', mimetype: 'video/mp4', path: '/tmp/vid.mp4' },
-        { filename: 'doc.pdf', mimetype: 'application/pdf', path: '/tmp/doc.pdf' },
+        {
+          filename: 'doc.pdf',
+          mimetype: 'application/pdf',
+          path: '/tmp/doc.pdf',
+        },
         { filename: 'aud.mp3', mimetype: 'audio/mpeg', path: '/tmp/aud.mp3' },
-        { filename: 'other.txt', mimetype: 'text/plain', path: '/tmp/other.txt' },
+        {
+          filename: 'other.txt',
+          mimetype: 'text/plain',
+          path: '/tmp/other.txt',
+        },
       ] as any;
       const sigId = new Types.ObjectId().toHexString();
 
       await service.createManyFromUploadedFiles(files, sigId);
 
-      expect(model.insertMany).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({ fileType: TypeEpreuve.IMAGE }),
-        expect.objectContaining({ fileType: TypeEpreuve.VIDEO }),
-        expect.objectContaining({ fileType: TypeEpreuve.DOCUMENT }),
-        expect.objectContaining({ fileType: TypeEpreuve.AUDIO }),
-        expect.objectContaining({ fileType: TypeEpreuve.OTHER }),
-      ]));
+      expect(model.insertMany).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ fileType: TypeEpreuve.IMAGE }),
+          expect.objectContaining({ fileType: TypeEpreuve.VIDEO }),
+          expect.objectContaining({ fileType: TypeEpreuve.DOCUMENT }),
+          expect.objectContaining({ fileType: TypeEpreuve.AUDIO }),
+          expect.objectContaining({ fileType: TypeEpreuve.OTHER }),
+        ]),
+      );
     });
 
     it('should throw InternalServerErrorException and cleanup if DB insert fails', async () => {
@@ -114,7 +133,9 @@ describe('PreuveService', () => {
       model.insertMany.mockRejectedValue(new Error('DB Error'));
       const sigId = new Types.ObjectId().toHexString();
 
-      await expect(service.createManyFromUploadedFiles(files, sigId)).rejects.toThrow(InternalServerErrorException);
+      await expect(
+        service.createManyFromUploadedFiles(files, sigId),
+      ).rejects.toThrow(InternalServerErrorException);
       expect(fs.unlinkSync).toHaveBeenCalled();
     });
   });
@@ -122,28 +143,46 @@ describe('PreuveService', () => {
   describe('findAllPreuvesBySignalement', () => {
     it('should return proofs for owner', async () => {
       const user = { id: 'user-123', role: UserRole.STUDENT };
-      model.find.mockReturnValue({ lean: jest.fn().mockResolvedValue([mockPreuve]) });
+      model.find.mockReturnValue({
+        lean: jest.fn().mockResolvedValue([mockPreuve]),
+      });
 
-      const result = await service.findAllPreuvesBySignalement(mockSignalement._id.toHexString(), user);
+      const result = await service.findAllPreuvesBySignalement(
+        mockSignalement._id.toHexString(),
+        user,
+      );
 
-      expect(signalementModel.findOne).toHaveBeenCalledWith(expect.objectContaining({ reportedBy: 'user-123' }));
+      expect(signalementModel.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({ reportedBy: 'user-123' }),
+      );
       expect(result).toEqual([mockPreuve]);
     });
 
     it('should return proofs for admin without reporter check', async () => {
       const user = { id: 'admin-123', role: UserRole.ADMIN };
-      model.find.mockReturnValue({ lean: jest.fn().mockResolvedValue([mockPreuve]) });
+      model.find.mockReturnValue({
+        lean: jest.fn().mockResolvedValue([mockPreuve]),
+      });
 
-      await service.findAllPreuvesBySignalement(mockSignalement._id.toHexString(), user);
+      await service.findAllPreuvesBySignalement(
+        mockSignalement._id.toHexString(),
+        user,
+      );
 
-      expect(signalementModel.findOne).toHaveBeenCalledWith(expect.not.objectContaining({ reportedBy: expect.anything() }));
+      expect(signalementModel.findOne).toHaveBeenCalledWith(
+        expect.not.objectContaining({ reportedBy: expect.anything() }),
+      );
     });
 
     it('should throw NotFoundException if signalement not found', async () => {
-      signalementModel.findOne.mockReturnValue({ lean: jest.fn().mockResolvedValue(null) });
+      signalementModel.findOne.mockReturnValue({
+        lean: jest.fn().mockResolvedValue(null),
+      });
       const user = { id: 'u', role: UserRole.STUDENT };
 
-      await expect(service.findAllPreuvesBySignalement('id', user)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.findAllPreuvesBySignalement('id', user),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -152,27 +191,38 @@ describe('PreuveService', () => {
 
     it('should throw NotFoundException if preuve not found', async () => {
       model.findOne.mockResolvedValue(null);
-      await expect(service.deletePreuve(new Types.ObjectId(), user)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.deletePreuve(new Types.ObjectId(), user),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ForbiddenException if user not authorized', async () => {
       model.findOne.mockReturnValue(createMockQuery(mockPreuve));
       signalementModel.findOne.mockReturnValue(createMockQuery(null));
 
-      await expect(service.deletePreuve(mockPreuve._id, user)).rejects.toThrow(ForbiddenException);
+      await expect(service.deletePreuve(mockPreuve._id, user)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should throw BadRequestException if signalement status is blocked', async () => {
       model.findOne.mockReturnValue(createMockQuery(mockPreuve));
-      const blockedSig = { ...mockSignalement, status: StatutSignalement.RESOLU };
+      const blockedSig = {
+        ...mockSignalement,
+        status: StatutSignalement.RESOLU,
+      };
       signalementModel.findOne.mockReturnValue(createMockQuery(blockedSig));
 
-      await expect(service.deletePreuve(mockPreuve._id, user)).rejects.toThrow(BadRequestException);
+      await expect(service.deletePreuve(mockPreuve._id, user)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should delete successfully', async () => {
       model.findOne.mockReturnValue(createMockQuery(mockPreuve));
-      signalementModel.findOne.mockReturnValue(createMockQuery(mockSignalement));
+      signalementModel.findOne.mockReturnValue(
+        createMockQuery(mockSignalement),
+      );
 
       const result = await service.deletePreuve(mockPreuve._id, user);
 
@@ -205,7 +255,10 @@ describe('PreuveService', () => {
       const sigId = new Types.ObjectId();
       const date = new Date();
       await service.softDeleteBySignalement(sigId, date);
-      expect(model.updateMany).toHaveBeenCalledWith({ signalementId: sigId, isDeleted: false }, { isDeleted: true, deletedAt: date });
+      expect(model.updateMany).toHaveBeenCalledWith(
+        { signalementId: sigId, isDeleted: false },
+        { isDeleted: true, deletedAt: date },
+      );
     });
   });
 });

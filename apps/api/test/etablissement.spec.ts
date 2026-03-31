@@ -93,7 +93,7 @@ describe('EtablissementService', () => {
       model.findOne.mockResolvedValue(null);
       model.create.mockResolvedValue({ _id: mockId, ...dto });
 
-      const result = await service.create(dto  as any);
+      const result = await service.create(dto as any);
 
       expect(model.findOne).toHaveBeenCalledWith({
         $or: [{ nom: dto.nom }, { code: dto.code }],
@@ -105,20 +105,28 @@ describe('EtablissementService', () => {
     it(`leve ConflictException si le nom existe deja`, async () => {
       model.findOne.mockResolvedValue(makeEtab());
 
-      await expect(service.create(dto as any)).rejects.toThrow(ConflictException);
+      await expect(service.create(dto as any)).rejects.toThrow(
+        ConflictException,
+      );
       expect(model.create).not.toHaveBeenCalled();
     });
 
     it(`leve ConflictException si le code existe deja`, async () => {
-      model.findOne.mockResolvedValue(makeEtab({ nom: 'Autre', code: dto.code }));
+      model.findOne.mockResolvedValue(
+        makeEtab({ nom: 'Autre', code: dto.code }),
+      );
 
-      await expect(service.create(dto as any)).rejects.toThrow(ConflictException);
+      await expect(service.create(dto as any)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it(`leve ConflictException si nom ET code existent tous les deux`, async () => {
       model.findOne.mockResolvedValue(makeEtab());
 
-      await expect(service.create(dto as any)).rejects.toThrow(ConflictException);
+      await expect(service.create(dto as any)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -387,7 +395,9 @@ describe('EtablissementService', () => {
     it(`leve NotFoundException si etablissement inexistant`, async () => {
       model.findById.mockResolvedValue(null);
 
-      await expect(service.update(mockId, updateDto)).rejects.toThrow(NotFoundException);
+      await expect(service.update(mockId, updateDto)).rejects.toThrow(
+        NotFoundException,
+      );
       expect(model.findByIdAndUpdate).not.toHaveBeenCalled();
     });
   });
@@ -403,8 +413,12 @@ describe('EtablissementService', () => {
 
       const result = await service.DesOrActive(mockId);
 
-      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(mockId, { isActive: false });
-      expect(result).toEqual({ message: 'Établissement désactivé avec succès' });
+      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(mockId, {
+        isActive: false,
+      });
+      expect(result).toEqual({
+        message: 'Établissement désactivé avec succès',
+      });
     });
 
     it(`active un etablissement inactif`, async () => {
@@ -413,14 +427,18 @@ describe('EtablissementService', () => {
 
       const result = await service.DesOrActive(mockId);
 
-      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(mockId, { isActive: true });
+      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(mockId, {
+        isActive: true,
+      });
       expect(result).toEqual({ message: 'Établissement activé avec succès' });
     });
 
     it(`leve NotFoundException si etablissement inexistant`, async () => {
       model.findById.mockResolvedValue(null);
 
-      await expect(service.DesOrActive(mockId)).rejects.toThrow(NotFoundException);
+      await expect(service.DesOrActive(mockId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -449,14 +467,18 @@ describe('EtablissementService', () => {
     it(`leve NotFoundException si etablissement inexistant`, async () => {
       model.findById.mockResolvedValue(null);
 
-      await expect(service.softDelete(mockId)).rejects.toThrow(NotFoundException);
+      await expect(service.softDelete(mockId)).rejects.toThrow(
+        NotFoundException,
+      );
       expect(model.findByIdAndUpdate).not.toHaveBeenCalled();
     });
 
     it(`leve BadRequestException si deja supprime`, async () => {
       model.findById.mockResolvedValue(makeEtab({ isDeleted: true }));
 
-      await expect(service.softDelete(mockId)).rejects.toThrow(BadRequestException);
+      await expect(service.softDelete(mockId)).rejects.toThrow(
+        BadRequestException,
+      );
       expect(model.findByIdAndUpdate).not.toHaveBeenCalled();
     });
   });

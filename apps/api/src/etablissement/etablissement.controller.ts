@@ -1,4 +1,15 @@
-import { Controller, Post, Body, Get, Query, UseGuards, Put, Param, Delete, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Query,
+  UseGuards,
+  Put,
+  Param,
+  Delete,
+  Patch,
+} from '@nestjs/common';
 import { EtablissementService } from './etablissement.service';
 import { CreateEtablissementDto } from '@/etablissement/dto/EtablssementCreate.dto';
 import { QueryEtablissementDto } from './dto/query-etablissement.dto';
@@ -11,7 +22,7 @@ import { Types } from 'mongoose';
 
 @Controller('etablissements')
 export class EtablissementController {
-  constructor(private readonly etablissementService: EtablissementService) { }
+  constructor(private readonly etablissementService: EtablissementService) {}
 
   // ─── POST /etablissements ──────────────────────────────────────────────────
   @Post()
@@ -20,7 +31,6 @@ export class EtablissementController {
   async create(@Body() createEtablissementDto: CreateEtablissementDto) {
     return this.etablissementService.create(createEtablissementDto);
   }
-
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -65,18 +75,17 @@ export class EtablissementController {
   @Roles(UserRole.ADMIN)
   async DesOrActive(@Param('id') id: Types.ObjectId) {
     return this.etablissementService.DesOrActive(id);
-
   }
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   async update(
     @Param('id') id: Types.ObjectId,
-    @Body() body: EtablissementUpdateDto
+    @Body() body: EtablissementUpdateDto,
   ) {
     const updated = await this.etablissementService.update(id, body);
     return {
-      message: "La mise à jour a été effectuée avec succès",
+      message: 'La mise à jour a été effectuée avec succès',
       data: updated,
     };
   }
@@ -87,5 +96,4 @@ export class EtablissementController {
   softDelete(@Param('id') id: Types.ObjectId) {
     return this.etablissementService.softDelete(id);
   }
-
 }

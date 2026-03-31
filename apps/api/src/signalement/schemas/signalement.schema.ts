@@ -2,13 +2,17 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { NiveauGravite, StatutSignalement, Nature, TypeViolence } from '@shared/enums';
+import {
+  NiveauGravite,
+  StatutSignalement,
+  Nature,
+  TypeViolence,
+} from '@shared/enums';
 
 export type SignalementDocument = HydratedDocument<Signalement>;
 
 @Schema({ timestamps: true, collection: 'signalements' })
 export class Signalement {
-
   @Prop({
     required: true,
     trim: true,
@@ -30,7 +34,7 @@ export class Signalement {
     type: Date,
     validate: {
       validator: (v: Date) => v <= new Date(),
-      message: 'La date de l\'incident ne peut pas être dans le futur.',
+      message: "La date de l'incident ne peut pas être dans le futur.",
     },
   })
   dateIncident: Date;
@@ -63,7 +67,7 @@ export class Signalement {
     required: true,
     type: String,
     enum: StatutSignalement,
-    default: StatutSignalement.NOUVEAU
+    default: StatutSignalement.NOUVEAU,
   })
   status: StatutSignalement;
 
@@ -84,7 +88,6 @@ export class Signalement {
   @Prop({ type: Types.ObjectId, ref: 'User', default: null })
   deletedBy: Types.ObjectId | null;
 
-
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
@@ -96,7 +99,5 @@ export class Signalement {
 
 export const SignalementSchema = SchemaFactory.createForClass(Signalement);
 
-
 SignalementSchema.index({ reportedBy: 1, isDeleted: 1 });
 SignalementSchema.index({ dateIncident: -1 });
-

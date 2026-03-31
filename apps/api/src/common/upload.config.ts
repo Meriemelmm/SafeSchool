@@ -7,24 +7,24 @@ export const multerConfig = {
   storage: diskStorage({
     destination: './uploads/preuves',
     filename: (req, file, cb) => {
-      const ext = extname(file.originalname) || '.bin'; 
-      cb(null, `${uuidv4()}${ext}`);          
+      const ext = extname(file.originalname) || '.bin';
+      cb(null, `${uuidv4()}${ext}`);
     },
   }),
   fileFilter: (req, file, cb) => {
     const allowed = [
-      'image/jpeg', 
-      'image/png', 
+      'image/jpeg',
+      'image/png',
       'image/webp',
-      'video/mp4', 
+      'video/mp4',
       'video/quicktime',
-      'audio/mpeg', 
-      'audio/wav', 
+      'audio/mpeg',
+      'audio/wav',
       'audio/ogg',
       'audio/webm',
       'application/pdf',
       'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
@@ -33,4 +33,4 @@ export const multerConfig = {
     }
   },
   limits: { fileSize: 50 * 1024 * 1024 },
-};
+};
