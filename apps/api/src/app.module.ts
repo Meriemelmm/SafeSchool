@@ -19,7 +19,9 @@ import { join } from 'path';
   imports: [
     // Load .env globally first
     ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/safeschool'),
+    MongooseModule.forRoot(
+      process.env.MONGODB_URI || 'mongodb://localhost:27017/safeschool',
+    ),
     MailerModule.forRoot({
       transport: {
         host: process.env.EMAIL_HOST || 'sandbox.smtp.mailtrap.io',
@@ -30,12 +32,18 @@ import { join } from 'path';
         },
       },
       defaults: {
-        from: process.env.FROM_EMAIL || '"SafeSchool Admin" <noreply@safeschool.com>',
+        from:
+          process.env.FROM_EMAIL ||
+          '"SafeSchool Admin" <noreply@safeschool.com>',
       },
     }),
 
     UsersModule,
-    AuthModule, EtablissementModule, MailModule, SignalementModule, PreuveModule,
+    AuthModule,
+    EtablissementModule,
+    MailModule,
+    SignalementModule,
+    PreuveModule,
 
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
@@ -45,4 +53,4 @@ import { join } from 'path';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

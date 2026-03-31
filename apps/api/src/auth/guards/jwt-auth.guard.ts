@@ -5,7 +5,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { JsonWebTokenError, TokenExpiredError, NotBeforeError } from 'jsonwebtoken';
+import {
+  JsonWebTokenError,
+  TokenExpiredError,
+  NotBeforeError,
+} from 'jsonwebtoken';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -71,7 +75,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
           });
         }
 
-        if (info.message.includes('malformed') || info.message.includes('invalid token')) {
+        if (
+          info.message.includes('malformed') ||
+          info.message.includes('invalid token')
+        ) {
           throw new UnauthorizedException({
             statusCode: 401,
             message: 'Malformed access token',

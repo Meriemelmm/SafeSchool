@@ -9,14 +9,13 @@ import {
 import { EtablissementType } from '@shared/enums';
 
 export class CreateEtablissementDto {
-
   @IsString()
   @IsNotEmpty({ message: 'Le nom est requis' })
-  nom: string;                    
+  nom: string;
 
   @IsString()
   @IsNotEmpty({ message: "L'adresse est requise" })
-  adresse: string;                 
+  adresse: string;
 
   @IsString()
   @IsNotEmpty({ message: 'La ville est requise' })
@@ -26,7 +25,7 @@ export class CreateEtablissementDto {
   @IsNotEmpty({ message: 'Le code est requis' })
   code: string;
 
-  @IsEnum(EtablissementType, {   
+  @IsEnum(EtablissementType, {
     message: 'Type invalide — valeurs: ecole, college, lycee',
   })
   @IsNotEmpty()
@@ -34,10 +33,10 @@ export class CreateEtablissementDto {
 
   @IsString()
   @IsOptional()
-  telephone?: string;              
+  telephone?: string;
 
   @IsEmail({}, { message: 'Email invalide' })
-  @IsOptional()                    
+  @IsOptional()
   email?: string;
 
   @IsOptional()

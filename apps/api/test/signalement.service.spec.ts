@@ -2,10 +2,19 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SignalementService } from '@/signalement/signalement.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { SignalementMemberService } from '@/signalement-member/signalement-member.service';
 import { PreuveService } from '@/preuve/preuve.service';
-import { StatutSignalement, UserRole, Nature, TypeViolence } from '@shared/enums';
+import {
+  StatutSignalement,
+  UserRole,
+  Nature,
+  TypeViolence,
+} from '@shared/enums';
 
 describe('SignalementService', () => {
   let service: SignalementService;
@@ -47,7 +56,9 @@ describe('SignalementService', () => {
     model = Object.assign(modelConstructor, {
       find: jest.fn().mockReturnValue(createMockQuery([])),
       findOne: jest.fn().mockReturnValue(createMockQuery(mockSignalement)),
-      findByIdAndUpdate: jest.fn().mockReturnValue(createMockQuery(mockSignalement)),
+      findByIdAndUpdate: jest
+        .fn()
+        .mockReturnValue(createMockQuery(mockSignalement)),
       countDocuments: jest.fn(),
       updateOne: jest.fn(),
     });
@@ -108,13 +119,19 @@ describe('SignalementService', () => {
 
       expect(result.data).toHaveLength(1);
       expect(result.meta.total).toBe(1);
-      expect(model.find).toHaveBeenCalledWith(expect.objectContaining({
-        $or: expect.any(Array),
-      }));
+      expect(model.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          $or: expect.any(Array),
+        }),
+      );
     });
 
     it('should hide reporter for anonymous signalements', async () => {
-      const anonSig = { ...mockSignalement, isAnonymous: true, reportedBy: { firstName: 'John' } };
+      const anonSig = {
+        ...mockSignalement,
+        isAnonymous: true,
+        reportedBy: { firstName: 'John' },
+      };
       model.find.mockReturnValue({
         populate: jest.fn().mockReturnThis(),
         sort: jest.fn().mockReturnThis(),
@@ -132,37 +149,71 @@ describe('SignalementService', () => {
   describe('findOne', () => {
     it('should throw NotFoundException if not found', async () => {
       model.findOne.mockReturnValue(createMockQuery(null));
-      await expect(service.findOne('id', { id: 'u', role: UserRole.ADMIN })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.findOne('id', { id: 'u', role: UserRole.ADMIN }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should return for owner', async () => {
       model.findOne.mockReturnValue(createMockQuery(mockSignalement));
-      const result = await service.findOne(mockSignalementId.toHexString(), { id: mockUserId.toHexString(), role: UserRole.STUDENT });
+      const result = await service.findOne(mockSignalementId.toHexString(), {
+        id: mockUserId.toHexString(),
+        role: UserRole.STUDENT,
+      });
       expect(result._id).toEqual(mockSignalementId);
     });
   });
 
   describe('updateStatusSignalement', () => {
     it('should throw NotFoundException if missing', async () => {
-      model.findOne.mockReturnValue({ lean: jest.fn().mockResolvedValue(null) });
-      await expect(service.updateStatusSignalement(mockSignalementId, StatutSignalement.EN_COURS)).rejects.toThrow(NotFoundException);
+      model.findOne.mockReturnValue({
+        lean: jest.fn().mockResolvedValue(null),
+      });
+      await expect(
+        service.updateStatusSignalement(
+          mockSignalementId,
+          StatutSignalement.EN_COURS,
+        ),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException if same status', async () => {
-      model.findOne.mockReturnValue({ lean: jest.fn().mockResolvedValue(mockSignalement) });
-      await expect(service.updateStatusSignalement(mockSignalementId, StatutSignalement.NOUVEAU)).rejects.toThrow(BadRequestException);
+      model.findOne.mockReturnValue({
+        lean: jest.fn().mockResolvedValue(mockSignalement),
+      });
+      await expect(
+        service.updateStatusSignalement(
+          mockSignalementId,
+          StatutSignalement.NOUVEAU,
+        ),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException for invalid transition', async () => {
-      model.findOne.mockReturnValue({ lean: jest.fn().mockResolvedValue({ status: StatutSignalement.RESOLU }) });
-      await expect(service.updateStatusSignalement(mockSignalementId, StatutSignalement.EN_COURS)).rejects.toThrow(BadRequestException);
+      model.findOne.mockReturnValue({
+        lean: jest.fn().mockResolvedValue({ status: StatutSignalement.RESOLU }),
+      });
+      await expect(
+        service.updateStatusSignalement(
+          mockSignalementId,
+          StatutSignalement.EN_COURS,
+        ),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should update successfully', async () => {
       model.findOne.mockReturnValue(createMockQuery(mockSignalement));
-      model.findByIdAndUpdate.mockReturnValue(createMockQuery({ ...mockSignalement, status: StatutSignalement.EN_COURS }));
+      model.findByIdAndUpdate.mockReturnValue(
+        createMockQuery({
+          ...mockSignalement,
+          status: StatutSignalement.EN_COURS,
+        }),
+      );
 
-      const result = await service.updateStatusSignalement(mockSignalementId, StatutSignalement.EN_COURS);
+      const result = await service.updateStatusSignalement(
+        mockSignalementId,
+        StatutSignalement.EN_COURS,
+      );
       expect(result).toBeDefined();
       expect(result!.status).toBe(StatutSignalement.EN_COURS);
     });
@@ -170,13 +221,26 @@ describe('SignalementService', () => {
 
   describe('deleteSignalement', () => {
     it('should throw ForbiddenException if not authorized', async () => {
-      model.findOne.mockResolvedValue({ ...mockSignalement, reportedBy: new Types.ObjectId() });
-      await expect(service.deleteSignalement(mockSignalementId.toHexString(), mockUserId.toHexString(), UserRole.STUDENT)).rejects.toThrow(ForbiddenException);
+      model.findOne.mockResolvedValue({
+        ...mockSignalement,
+        reportedBy: new Types.ObjectId(),
+      });
+      await expect(
+        service.deleteSignalement(
+          mockSignalementId.toHexString(),
+          mockUserId.toHexString(),
+          UserRole.STUDENT,
+        ),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should delete and call dependencies', async () => {
       model.findOne.mockResolvedValue(mockSignalement);
-      await service.deleteSignalement(mockSignalementId.toHexString(), mockUserId.toHexString(), UserRole.STUDENT);
+      await service.deleteSignalement(
+        mockSignalementId.toHexString(),
+        mockUserId.toHexString(),
+        UserRole.STUDENT,
+      );
 
       expect(model.updateOne).toHaveBeenCalled();
       expect(preuveService.softDeleteBySignalement).toHaveBeenCalled();
@@ -186,13 +250,27 @@ describe('SignalementService', () => {
 
   describe('updateSignalement', () => {
     it('should throw ForbiddenException if not owner', async () => {
-      model.findOne.mockResolvedValue({ ...mockSignalement, reportedBy: new Types.ObjectId() });
-      await expect(service.updateSignalement('id', {} as any, { id: mockUserId.toHexString() })).rejects.toThrow(ForbiddenException);
+      model.findOne.mockResolvedValue({
+        ...mockSignalement,
+        reportedBy: new Types.ObjectId(),
+      });
+      await expect(
+        service.updateSignalement('id', {} as any, {
+          id: mockUserId.toHexString(),
+        }),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should throw BadRequestException if status is not Nouveau/EnCours', async () => {
-      model.findOne.mockResolvedValue({ ...mockSignalement, status: StatutSignalement.RESOLU });
-      await expect(service.updateSignalement('id', {} as any, { id: mockUserId.toHexString() })).rejects.toThrow(BadRequestException);
+      model.findOne.mockResolvedValue({
+        ...mockSignalement,
+        status: StatutSignalement.RESOLU,
+      });
+      await expect(
+        service.updateSignalement('id', {} as any, {
+          id: mockUserId.toHexString(),
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should update and call relative services', async () => {
@@ -205,7 +283,11 @@ describe('SignalementService', () => {
         deletedPreuveIds: ['507f1f77bcf86cd799439011'],
       };
 
-      await service.updateSignalement(mockSignalementId.toHexString(), updateData as any, { id: mockUserId.toHexString() });
+      await service.updateSignalement(
+        mockSignalementId.toHexString(),
+        updateData as any,
+        { id: mockUserId.toHexString() },
+      );
 
       expect(memberService.synchronizeMembers).toHaveBeenCalled();
       expect(preuveService.softDeleteMany).toHaveBeenCalled();
@@ -225,7 +307,9 @@ describe('SignalementService', () => {
       const result = await service.getMyReports(mockUserId, {});
 
       expect(result.data).toHaveLength(1);
-      expect(model.find).toHaveBeenCalledWith(expect.objectContaining({ reportedBy: mockUserId }));
+      expect(model.find).toHaveBeenCalledWith(
+        expect.objectContaining({ reportedBy: mockUserId }),
+      );
     });
   });
 });

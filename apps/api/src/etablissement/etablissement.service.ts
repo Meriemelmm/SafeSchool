@@ -1,12 +1,18 @@
-import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { EtablissementUpdateDto } from '@/etablissement/dto/EtablissementUpdate.dto';
 import { Types } from 'mongoose';
 
-
-
-import { Etablissement, EtablissementDocument } from './schemas/etablissement.schema';
+import {
+  Etablissement,
+  EtablissementDocument,
+} from './schemas/etablissement.schema';
 import { CreateEtablissementDto } from '@/etablissement/dto/EtablssementCreate.dto';
 import { QueryEtablissementDto } from '@/etablissement/dto/query-etablissement.dto';
 
@@ -15,7 +21,7 @@ export class EtablissementService {
   constructor(
     @InjectModel(Etablissement.name)
     private readonly etablissementModel: Model<EtablissementDocument>,
-  ) { }
+  ) {}
 
   // ─── CREATE ─────────────────────────────────────────────────────────────────
   async create(dto: CreateEtablissementDto): Promise<Etablissement> {
@@ -43,12 +49,16 @@ export class EtablissementService {
     //  Search global — nom OU code OU ville
     if (search?.trim()) {
       const regex = new RegExp(search.trim(), 'i');
-      filter.$or = [{ nom: regex }, { code: regex }, { ville: regex }, { adresse: regex }];
+      filter.$or = [
+        { nom: regex },
+        { code: regex },
+        { ville: regex },
+        { adresse: regex },
+      ];
     }
 
-    //  Filtres 
+    //  Filtres
     if (type) filter.type = type;
-
 
     if (ville?.trim() && !search) {
       filter.ville = new RegExp(ville.trim(), 'i');
@@ -93,7 +103,9 @@ export class EtablissementService {
     const cities = await this.etablissementModel
       .distinct('ville', { isDeleted: false, isActive: true })
       .exec();
-    return cities.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+    return cities.sort((a, b) =>
+      a.localeCompare(b, 'fr', { sensitivity: 'base' }),
+    );
   }
 
   async findByCity(ville: string) {
@@ -115,7 +127,11 @@ export class EtablissementService {
       throw new NotFoundException('Établissement non trouvé');
     }
 
-    const updated = await this.etablissementModel.findByIdAndUpdate(id, { ...data }, { new: true });
+    const updated = await this.etablissementModel.findByIdAndUpdate(
+      id,
+      { ...data },
+      { new: true },
+    );
     return updated;
   }
 
@@ -131,7 +147,6 @@ export class EtablissementService {
       await this.etablissementModel.findByIdAndUpdate(id, { isActive: true });
       return { message: 'Établissement activé avec succès' };
     }
-
   }
   async softDelete(id: Types.ObjectId): Promise<{ message: string }> {
     const etablissement = await this.etablissementModel.findById(id);
@@ -147,10 +162,8 @@ export class EtablissementService {
       isDeleted: true,
       deletedAt: new Date(),
       isActive: false,
-
     });
 
     return { message: 'Établissement supprimé avec succès' };
   }
 }
-

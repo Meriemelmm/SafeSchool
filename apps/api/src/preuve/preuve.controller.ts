@@ -1,4 +1,15 @@
-import { Controller, Post,Delete, UseGuards,Get,Param ,UseInterceptors, UploadedFiles, Body, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Delete,
+  UseGuards,
+  Get,
+  Param,
+  UseInterceptors,
+  UploadedFiles,
+  Body,
+  BadRequestException,
+} from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { PreuveService } from './preuve.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
@@ -10,44 +21,50 @@ import { Types } from 'mongoose';
 import { UserRole } from '@shared/enums';
 import { Roles } from '@/common/decorators/roles.decorator';
 
- 
-
 @Controller('preuve')
 @UseGuards(JwtAuthGuard)
 export class PreuveController {
   constructor(private readonly preuveService: PreuveService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard,RolesGuard)
-   @UseInterceptors(FilesInterceptor('files', 10, multerConfig)) 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseInterceptors(FilesInterceptor('files', 10, multerConfig))
   async uploadPreuves(
     @Body() createPreuveDto: CreatePreuveDto,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     if (!files || files.length === 0) {
-      throw new BadRequestException('Aucun fichier n\'a été téléchargé');
+      throw new BadRequestException("Aucun fichier n'a été téléchargé");
     }
-    await this.preuveService.createManyFromUploadedFiles(files, createPreuveDto.signalementId);
+    await this.preuveService.createManyFromUploadedFiles(
+      files,
+      createPreuveDto.signalementId,
+    );
     return {
       message: 'Les preuves ont été ajoutées avec succès',
     };
   }
-   @Get('signalement/:id')
-   @UseGuards(JwtAuthGuard)
-    async    PreuveBysignalement(@Param('id') id,@CurrentUser() CurrentUser){
-      console.log("id",id);
-       const  preuves= await this.preuveService.findAllPreuvesBySignalement(id,CurrentUser);
-       return {
-      message: "Les preuves récupérées avec succès",
-         data:preuves
-       }
+  @Get('signalement/:id')
+  @UseGuards(JwtAuthGuard)
+  async PreuveBysignalement(@Param('id') id, @CurrentUser() CurrentUser) {
+    console.log('id', id);
+    const preuves = await this.preuveService.findAllPreuvesBySignalement(
+      id,
+      CurrentUser,
+    );
+    return {
+      message: 'Les preuves récupérées avec succès',
+      data: preuves,
+    };
+  }
 
-    }
-
- @Delete(':id')
-@UseGuards(JwtAuthGuard,RolesGuard)
-@Roles(UserRole.PARENT,UserRole.STUDENT)
-async deletePreuve(@Param('id') id: Types.ObjectId,@CurrentUser()CurrentUser) {
-  return this.preuveService.deletePreuve(id,CurrentUser);
-}
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PARENT, UserRole.STUDENT)
+  async deletePreuve(
+    @Param('id') id: Types.ObjectId,
+    @CurrentUser() CurrentUser,
+  ) {
+    return this.preuveService.deletePreuve(id, CurrentUser);
+  }
 }

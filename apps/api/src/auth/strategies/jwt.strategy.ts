@@ -23,7 +23,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload) {
-    
     const user = await this.usersService.findById(payload.sub);
     if (!user) {
       throw new UnauthorizedException('User not found');
@@ -31,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (user.isDeleted) {
       throw new UnauthorizedException('User account has been deleted');
     }
-  
+
     return { id: payload.sub, email: payload.email, role: payload.role };
   }
 }

@@ -17,7 +17,7 @@ import { Transform, Type } from 'class-transformer';
 
 export class StudentProfileDto {
   @IsOptional()
-  @IsMongoId({ message: 'L\'ID de l\'établissement doit être valide' })
+  @IsMongoId({ message: "L'ID de l'établissement doit être valide" })
   etablissementId?: string;
 
   // @IsNotEmpty({ message: 'Le numéro scolaire est obligatoire pour un élève' })
@@ -30,15 +30,13 @@ export class StudentProfileDto {
 }
 
 export class ParentProfileDto {
-
-
   @IsNotEmpty({ message: 'La relation est obligatoire pour un parent' })
   @IsIn(['père', 'mère', 'tuteur', 'autre'], { message: 'Relation invalide' })
   relation: string;
 }
 
 export class TeacherProfileDto {
-  @IsNotEmpty({ message: 'L\'établissement est obligatoire pour un professeur' })
+  @IsNotEmpty({ message: "L'établissement est obligatoire pour un professeur" })
   @IsMongoId()
   etablissementId: string;
 
@@ -80,8 +78,6 @@ export class UserDto {
   @IsEmail({}, { message: 'email must be a valid email address' })
   email: string;
 
-
-
   @IsEnum(UserRole, { message: 'role must be a valid user role' })
   role: UserRole;
 
@@ -112,8 +108,12 @@ export class UserDto {
         return AdminProfileDto;
       default:
         // Par défaut, aucun sous-objet n'est attendu si le rôle n'est pas reconnu
-        return class { };
+        return class {};
     }
   })
-  profileData?: StudentProfileDto | ParentProfileDto | TeacherProfileDto | AdminProfileDto;
+  profileData?:
+    | StudentProfileDto
+    | ParentProfileDto
+    | TeacherProfileDto
+    | AdminProfileDto;
 }

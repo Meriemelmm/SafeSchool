@@ -13,12 +13,15 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { NiveauGravite, Nature, TypeViolence, RoleIncident, TypeEpreuve } from '@shared/enums';
-
-
+import {
+  NiveauGravite,
+  Nature,
+  TypeViolence,
+  RoleIncident,
+  TypeEpreuve,
+} from '@shared/enums';
 
 export class CreateSignalementDto {
-
   @IsString({ message: 'Le titre doit être une chaîne de caractères.' })
   @IsNotEmpty({ message: 'Le titre est obligatoire.' })
   @MinLength(5, { message: 'Le titre doit contenir au moins 5 caractères.' })
@@ -27,17 +30,29 @@ export class CreateSignalementDto {
 
   @IsString({ message: 'La description doit être une chaîne de caractères.' })
   @IsNotEmpty({ message: 'La description est obligatoire.' })
-  @MinLength(10, { message: 'La description doit contenir au moins 10 caractères.' })
-  @MaxLength(2000, { message: 'La description ne peut pas dépasser 2000 caractères.' })
+  @MinLength(10, {
+    message: 'La description doit contenir au moins 10 caractères.',
+  })
+  @MaxLength(2000, {
+    message: 'La description ne peut pas dépasser 2000 caractères.',
+  })
   description: string;
 
-  @IsDateString({}, { message: 'La date de l\'incident doit être une date valide (format ISO 8601).' })
-  @IsNotEmpty({ message: 'La date de l\'incident est obligatoire.' })
+  @IsDateString(
+    {},
+    {
+      message:
+        "La date de l'incident doit être une date valide (format ISO 8601).",
+    },
+  )
+  @IsNotEmpty({ message: "La date de l'incident est obligatoire." })
   dateIncident: string;
 
   @IsString({ message: 'La localisation doit être une chaîne de caractères.' })
   @IsNotEmpty({ message: 'La localisation est obligatoire.' })
-  @MaxLength(300, { message: 'La localisation ne peut pas dépasser 300 caractères.' })
+  @MaxLength(300, {
+    message: 'La localisation ne peut pas dépasser 300 caractères.',
+  })
   location: string;
 
   @IsEnum(Nature, {
@@ -58,9 +73,9 @@ export class CreateSignalementDto {
   @IsNotEmpty({ message: 'Le type de violence est obligatoire.' })
   typeViolence: TypeViolence;
 
-  @IsBoolean({ message: 'Le champ anonymat doit être un booléen (true/false).' })
+  @IsBoolean({
+    message: 'Le champ anonymat doit être un booléen (true/false).',
+  })
   @IsOptional()
   isAnonymous?: boolean = false;
-
-  
 }

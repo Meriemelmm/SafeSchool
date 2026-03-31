@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
@@ -13,7 +17,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   // ─── Private helper: generate access + refresh tokens ───────────────────────
   private generateTokens(user: UserDocument) {
@@ -23,8 +27,11 @@ export class AuthService {
 
     // Refresh token signed with a different secret and longer expiry
     const refresh_token = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET', 'super-refresh-secret'),
-      expiresIn: this.configService.get('JWT_REFRESH_EXPIRES_IN', '7d') as any,
+      secret: this.configService.get<string>(
+        'JWT_REFRESH_SECRET',
+        'super-refresh-secret',
+      ),
+      expiresIn: this.configService.get('JWT_REFRESH_EXPIRES_IN', '7d'),
     });
 
     return { access_token, refresh_token };
@@ -32,7 +39,9 @@ export class AuthService {
 
   // ─── Register ────────────────────────────────────────────────────────────────
   async register(registerDto: RegisterDto) {
-    const existingUser = await this.usersService.findOneByEmail(registerDto.email);
+    const existingUser = await this.usersService.findOneByEmail(
+      registerDto.email,
+    );
     if (existingUser) {
       throw new BadRequestException('User with this email already exists');
     }
@@ -41,9 +50,8 @@ export class AuthService {
     const tokens = this.generateTokens(newUser);
     return {
       ...tokens,
-      user: this.usersService.sanitizeUser(newUser)
+      user: this.usersService.sanitizeUser(newUser),
     };
-
   }
 
   // ─── Login ───────────────────────────────────────────────────────────────────
@@ -53,7 +61,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password  credentials');
     }
@@ -61,7 +72,7 @@ export class AuthService {
     const tokens = this.generateTokens(user);
     return {
       ...tokens,
-      user: this.usersService.sanitizeUser(user)
+      user: this.usersService.sanitizeUser(user),
     };
   }
 
@@ -72,7 +83,7 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
     return {
-      user: this.usersService.sanitizeUser(fullUser)
+      user: this.usersService.sanitizeUser(fullUser),
     };
   }
 }

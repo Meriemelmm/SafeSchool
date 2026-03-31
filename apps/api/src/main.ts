@@ -8,15 +8,14 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
- app.enableCors({
-  origin: true,       
-  credentials: true, 
-});
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
 
   // app.useStaticAssets(join(__dirname, '..', '..', '..', 'uploads'), {
   //   prefix: '/uploads/',
   // });
-
 
   console.log(join(process.cwd(), 'apps/api/uploads'));
 
