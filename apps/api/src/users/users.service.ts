@@ -7,6 +7,7 @@ import * as bcrypt from 'bcryptjs';
 import { UserDto } from './dto/users.dto';
 import * as crypto from 'crypto';
 import { MailService } from '@/mail/mail.service';
+import { UserRole } from '@shared/enums';
 
 @Injectable()
 export class UsersService {
@@ -84,5 +85,14 @@ export class UsersService {
     await this.mailService.sendUserWelcome(user, plainPassword);
 
     return this.sanitizeUser(user);
+  }
+
+  async findAdminsAndTeachers(): Promise<UserDocument[]> {
+    return this.userModel
+      .find({
+        role: { $in: [UserRole.ADMIN, UserRole.TEACHER] },
+        isDeleted: { $ne: true },
+      })
+      .exec();
   }
 }

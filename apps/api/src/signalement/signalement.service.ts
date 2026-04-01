@@ -20,6 +20,9 @@ import {
 } from '@shared/enums';
 import { SignalementMemberService } from '@/signalement-member/signalement-member.service';
 import { PreuveService } from '@/preuve/preuve.service';
+import { NotificationService } from '@/notification/notification.service';
+import { UsersService } from '@/users/users.service';
+import { TypeNotification } from '@shared/enums';
 
 @Injectable()
 export class SignalementService {
@@ -28,7 +31,9 @@ export class SignalementService {
     private signalementModel: Model<SignalementDocument>,
     private readonly memberService: SignalementMemberService,
     private readonly preuveService: PreuveService,
-  ) {}
+    private readonly notificationService: NotificationService,
+    private readonly usersService: UsersService,
+  ) { }
 
   async create(
     createSignalementDto: CreateSignalementDto,
@@ -38,7 +43,28 @@ export class SignalementService {
       ...createSignalementDto,
       reportedBy: userId,
     });
-    return await newSignalement.save();
+    const saved = await newSignalement.save();
+
+    // 🔔 Notification : Nouveau signalement pour les admins/teachers
+    try {
+      const reporter = await this.usersService.findById(userId.toString());
+      const authorName = saved.isAnonymous ? 'Anonyme' : (reporter ? `${reporter.firstName} ${reporter.lastName}` : 'Anonyme');
+
+      const staff = await this.usersService.findAdminsAndTeachers();
+      const notificationPromises = staff.map((user) =>
+        this.notificationService.createAndSend(
+          user._id.toString(),
+          saved._id.toString(),
+          TypeNotification.NOUVEAU_SIGNALEMENT,
+          `Rapport : "${saved.title}" — Créé par ${authorName}`,
+        ),
+      );
+      await Promise.all(notificationPromises);
+    } catch (err) {
+      console.error('Erreur notification creation:', err);
+    }
+
+    return saved;
   }
   async findAll(filter) {
     const {
@@ -199,6 +225,20 @@ export class SignalementService {
       .findByIdAndUpdate(id, { $set: { status: newStatus } }, { new: true })
       .lean();
 
+    // 🔔 Notification : L'auteur reçoit l'info du changement de statut
+    try {
+      if (updated && updated.reportedBy) {
+        await this.notificationService.createAndSend(
+          updated.reportedBy.toString(),
+          updated._id.toString(),
+          TypeNotification.CHANGEMENT_STATUT,
+          `Le statut de votre signalement "${updated.title}" a été mis à jour vers : ${newStatus}`,
+        );
+      }
+    } catch (err) {
+      console.error('Erreur notification statut update:', err);
+    }
+
     return updated;
   }
 
@@ -332,12 +372,12 @@ export class SignalementService {
       nature,
       typeViolence,
     } = filter;
-    console.log('id de user', userId);
+   
     const query: any = {
       reportedBy: userId, // Avoid explicit new Types.ObjectId if already an ObjectId or if Mongoose can cast it
       isDeleted: { $ne: true },
     };
-    console.log('query', query);
+   
 
     if (status) query.status = status;
     if (nature) query.nature = nature;
@@ -363,7 +403,7 @@ export class SignalementService {
       this.signalementModel.countDocuments(query),
     ]);
 
-    console.log('signalements', signalements);
+   
     return {
       data: signalements,
       meta: {
