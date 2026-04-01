@@ -7,6 +7,8 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
+import { NotificationService } from '@/notification/notification.service';
+import { UsersService } from '@/users/users.service';
 import { SignalementMemberService } from '@/signalement-member/signalement-member.service';
 import { PreuveService } from '@/preuve/preuve.service';
 import {
@@ -21,6 +23,9 @@ describe('SignalementService', () => {
   let model: any;
   let memberService: any;
   let preuveService: any;
+  // Ajoute ces deux mocks avec memberService et preuveService
+let notificationService: any;
+let usersService: any;
 
   const mockUserId = new Types.ObjectId();
   const mockSignalementId = new Types.ObjectId();
@@ -73,6 +78,14 @@ describe('SignalementService', () => {
       softDeleteMany: jest.fn().mockResolvedValue(undefined),
       createManyFromUploadedFiles: jest.fn().mockResolvedValue(undefined),
     };
+    notificationService = {
+  createAndSend: jest.fn().mockResolvedValue(undefined),
+};
+
+usersService = {
+  findById: jest.fn().mockResolvedValue({ firstName: 'John', lastName: 'Doe' }),
+  findAdminsAndTeachers: jest.fn().mockResolvedValue([]),
+};
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -80,6 +93,8 @@ describe('SignalementService', () => {
         { provide: getModelToken('Signalement'), useValue: model },
         { provide: SignalementMemberService, useValue: memberService },
         { provide: PreuveService, useValue: preuveService },
+         { provide: NotificationService, useValue: notificationService }, // ✅ ajouté
+    { provide: UsersService, useValue: usersService }, 
       ],
     }).compile();
 
