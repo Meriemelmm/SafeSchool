@@ -77,7 +77,7 @@ export class AuthService {
   }
 
   // ─── Profile ──────────────────────────────────────────────────────────────────
-  async profile(user: any) {
+  async profile(user) {
     const fullUser = await this.usersService.findById(user.id);
     if (!fullUser) {
       throw new UnauthorizedException('User not found');

@@ -8,7 +8,6 @@ const cookieExtractor = (req: any) => {
   if (req && req.cookies) {
     token = req.cookies['token'];
   }
-  // Fallback to Bearer token just in case
   return token || ExtractJwt.fromAuthHeaderAsBearerToken()(req);
 };
 
