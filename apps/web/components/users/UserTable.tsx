@@ -41,23 +41,23 @@ export const UserTable: React.FC<UserTableProps> = ({ initialUsers, totalUsers }
   }, [limit]);
 
   useEffect(() => {
-    // If it's the very first render, skip fetching because server already provided data
+   
     if (!isMounted.current) {
       isMounted.current = true;
       return;
     }
 
-    // Otherwise, fetch whenever page or filters change
+   
     fetchUsers(page, filters);
   }, [page, filters, fetchUsers]);
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFilters(prev => ({ ...prev, role: e.target.value }));
-    setPage(1); // Always reset to first page when changing filters
+    setPage(1); 
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${name} ?`)) {
+   
       setDeletingId(id);
       try {
         await userService.deleteUser(id);
@@ -67,7 +67,7 @@ export const UserTable: React.FC<UserTableProps> = ({ initialUsers, totalUsers }
       } finally {
         setDeletingId(null);
       }
-    }
+    
   };
 
   const getRoleBadge = (role: string) => {

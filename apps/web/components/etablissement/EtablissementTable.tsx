@@ -67,8 +67,7 @@ export const EtablissementTable: React.FC<EtablissementTableProps> = ({ initialE
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'établissement ${name} ?`)) {
-      setDeletingId(id);
+    
       try {
         await etablissementService.deleteEtablissement(id);
         fetchEtablissements(page, filters);
@@ -77,7 +76,7 @@ export const EtablissementTable: React.FC<EtablissementTableProps> = ({ initialE
       } finally {
         setDeletingId(null);
       }
-    }
+    
   };
 
   return (

@@ -35,7 +35,7 @@ export default function RegisterShell() {
     <div className="w-full max-w-2xl mx-auto border-2 border-blue-400 rounded-lg bg-white p-8 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-[#1e293b]">Create Your Account</h1>
+        <h1 className="text-2xl font-bold text-[#1e293b]">Creer votre compte</h1>
         <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">
           Step {step} of {STEPS.length}
         </span>
@@ -76,21 +76,7 @@ export default function RegisterShell() {
         <Step3SchoolForm formData={formData} setFormData={setFormData} prevStep={prevStep} setError={setError} />
       )}
 
-      {/* Trust Badges */}
-      <div className="absolute bottom-[-35px] left-0 w-full flex justify-center items-center gap-8 text-[10px] uppercase font-bold text-gray-400">
-        <div className="flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="11" x="3" y="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-          END-TO-END ENCRYPTED
-        </div>
-        <div className="flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" /></svg>
-          VERIFIED IDENTITY
-        </div>
-        <div className="flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg>
-          ANONYMOUS OPTIONS
-        </div>
-      </div>
+     
     </div>
   );
 }

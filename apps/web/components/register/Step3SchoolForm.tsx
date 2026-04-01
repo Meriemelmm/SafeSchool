@@ -149,7 +149,7 @@ else if(result?.role === UserRole.PARENT){
       <div className="text-center mb-8">
         <h2 className="text-xl font-bold text-gray-900">Final Details</h2>
         <p className="text-sm text-gray-500 mt-1">
-          Just a few more {formData.role.toLowerCase()}-specific details.
+          Juste quelques détails supplémentaires propres à {formData.role.toLowerCase()}
         </p>
       </div>
 
@@ -171,7 +171,7 @@ else if(result?.role === UserRole.PARENT){
               }}
               className={selectClass('ville')}
             >
-              <option value="">Choose City</option>
+              <option value="">choisir ville</option>
               {cities.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <FieldError field="ville" />
@@ -182,7 +182,7 @@ else if(result?.role === UserRole.PARENT){
         {/* Establishment — masquée pour Parent */}
         {!isParent && (
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-gray-500">Choose Establishment</label>
+            <label className="text-xs font-semibold text-gray-500">choisir Establishment</label>
             <select
               value={selectedEtablissementId}
               onChange={(e) => {

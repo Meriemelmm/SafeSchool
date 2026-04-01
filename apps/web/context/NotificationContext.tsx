@@ -28,7 +28,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
   const [socket, setSocket] = useState<Socket | null>(null);
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
 
-  // 🔄 Charger l'historique au login
+ 
   useEffect(() => {
     const loadHistory = async () => {
       try {
@@ -47,7 +47,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (user) {
-      // Connexion au Socket.io du Backend
+      
       const socketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3007';
       const newSocket = io(socketUrl, {
         query: { userId: user._id }
@@ -55,11 +55,11 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
 
       setSocket(newSocket);
 
-      // Écouter les nouvelles notifications
+     
       newSocket.on('new_notification', (notification: NotificationData) => {
         setNotifications((prev) => [notification, ...prev]);
 
-        // Afficher l'alerte sur l'écran
+       
         toast(notification.message, {
           icon: '🔔',
           duration: 6000,
@@ -72,7 +72,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
           },
         });
 
-        // Notification sonore ou visuelle optionnelle ici
+       
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification("SafeSchool Alerte", { body: notification.message });
         }

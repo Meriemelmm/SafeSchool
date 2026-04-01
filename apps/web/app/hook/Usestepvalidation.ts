@@ -2,10 +2,7 @@
 import { useState, useCallback } from 'react';
 import * as Yup from 'yup';
 
-/**
- * Hook générique pour valider un objet avec un schéma Yup.
- * Retourne les erreurs champ par champ + une fonction validate().
- */
+
 export function useStepValidation<T extends object>(schema: Yup.ObjectSchema<any>) {
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof T, string>>>({});
 
@@ -31,7 +28,7 @@ export function useStepValidation<T extends object>(schema: Yup.ObjectSchema<any
     [schema],
   );
 
-  /** Efface l'erreur d'un champ précis quand l'utilisateur commence à taper */
+ 
   const clearError = useCallback((field: keyof T) => {
     setFieldErrors((prev) => {
       const next = { ...prev };

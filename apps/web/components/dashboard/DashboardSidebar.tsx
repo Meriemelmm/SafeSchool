@@ -9,7 +9,10 @@ import {
   FileText,
   BookOpen,
   MessageSquare,
+  User,
   LogOut,
+  Shield,
+  Lock
 } from "lucide-react";
 
 type SidebarItem = {
@@ -24,22 +27,24 @@ const menuByRole: Record<UserRole, SidebarItem[]> = {
     { href: "/dashboard/admin/users", label: "Gestion des utilisateurs", icon: FileText },
     { href: "/dashboard/admin/etablissements", label: "Gestion des établissements", icon: BookOpen },
     { href: "/dashboard/admin/signalement", label: "Gestion des signalements", icon: MessageSquare },
+    { href: "/dashboard/profile", label: "Mon Profil", icon: User },
   ],
   teacher: [
     { href: "/dashboard/teacher", label: "Tableau de bord", icon: LayoutDashboard },
     { href: "/dashboard/teacher/signalements", label: "Signalements", icon: FileText },
+    { href: "/dashboard/profile", label: "Mon Profil", icon: User },
   ],
   student: [
     { href: "/dashboard/student", label: "Dashboard", icon: LayoutDashboard },
     { href: "/dashboard/student/signalement/create", label: "Signaler un incident", icon: MessageSquare },
-    
-    { href: "/dashboard/student/signalement", label: "Mes Signalements", icon: FileText }
+    { href: "/dashboard/student/signalement", label: "Mes Signalements", icon: FileText },
+    { href: "/dashboard/profile", label: "Mon Profil", icon: User },
   ],
   parent: [
     { href: "/dashboard/parent", label: "Tableau de bord", icon: LayoutDashboard },
-      { href: "/dashboard/parent/signalement/create", label: "Signaler un incident", icon: MessageSquare },
-       { href: "/dashboard/parent/signalement", label: "Mes Signalements", icon: FileText },
- 
+    { href: "/dashboard/parent/signalement/create", label: "Signaler un incident", icon: MessageSquare },
+    { href: "/dashboard/parent/signalement", label: "Mes Signalements", icon: FileText },
+    { href: "/dashboard/profile", label: "Mon Profil", icon: User },
   ],
 };
 
@@ -56,47 +61,61 @@ export default function DashboardSidebar({ role, logout }: Props) {
   const isActive = (href: string) => pathname === href;
 
   return (
-    <aside className="w-72 bg-white border-r border-gray-200 shadow-lg flex flex-col">
-      <div className="px-6 py-5 border-b border-gray-200 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold">
-          SS
+    <aside className="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0">
+      {/* Brand Logo */}
+      <div className="px-8 py-10 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-200">
+          <Shield size={22} fill="white" />
         </div>
-        <div>
-          <p className="text-lg font-bold text-blue-700">SafeSchool</p>
-          <p className="text-xs text-gray-500 uppercase tracking-wide">{role}</p>
-        </div>
+        <span className="text-xl font-bold text-slate-800 tracking-tight">SafeSchool</span>
       </div>
 
-      <nav className="px-4 py-5 space-y-1 flex-1 overflow-auto">
+      {/* Navigation */}
+      <nav className="flex-1 px-4 space-y-1">
         {menu.map((item) => {
           const Icon = item.icon;
+          const active = isActive(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-                isActive(item.href)
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-700 hover:bg-blue-50 hover:text-blue-700"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                active
+                  ? "bg-slate-50 text-slate-900 border border-slate-100 shadow-sm"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
-              <Icon className="h-5 w-5" />
-              {item.label}
+              <Icon size={20} className={active ? "text-slate-900" : "text-slate-400"} strokeWidth={active ? 2.5 : 2} />
+              <span className={`text-[15px] ${active ? "font-bold" : "font-medium"}`}>{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="px-4 py-4 border-t border-gray-200">
+      {/* Identity Shield Card */}
+      <div className="px-6 mb-4">
+        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-2">
+            <div className="flex items-center gap-2 text-slate-500">
+                <Lock size={12} className="text-slate-400" />
+                <span className="text-[10px] font-black uppercase tracking-wider">Identity Shield Active</span>
+            </div>
+            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+                Your identity is hidden from school administrators by default.
+            </p>
+        </div>
+      </div>
+
+      {/* Sign Out */}
+      <div className="px-6 py-6 border-t border-slate-50">
         <button
           onClick={async () => {
             await logout();
             router.push("/");
           }}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg bg-red-50 text-red-700 hover:bg-red-100"
+          className="flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-red-600 transition-colors group"
         >
-          <LogOut className="h-4 w-4" />
-          Déconnexion
+          <LogOut size={20} className="text-slate-400 group-hover:text-red-500 transition-colors" />
+          <span className="text-[15px] font-medium">Déconnexion</span>
         </button>
       </div>
     </aside>
