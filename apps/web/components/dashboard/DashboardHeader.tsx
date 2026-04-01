@@ -1,5 +1,8 @@
 "use client";
 import { UserRole } from "shared/enums";
+import NotificationDropdown from "./NotificationDropdown";
+import { Moon, User, ChevronDown } from "lucide-react";
+import Link from "next/link";
 
 type Props = {
     userName: string;
@@ -9,20 +12,41 @@ type Props = {
 
 export default function DashboardHeader({ userName, userId, role }: Props) {
     return (
-        <header className="h-20 bg-white border-b border-gray-200 px-4 lg:px-8 flex items-center justify-between">
-            <div>
-                <h2 className="text-xl lg:text-2xl font-bold text-gray-800">Dashboard</h2>
-                <p className="text-xs lg:text-sm text-gray-500">Bienvenue, {userName} ({role})</p>
-            </div>
+        <header className="h-20 bg-white border-b border-slate-100 px-8 flex items-center justify-between sticky top-0 z-30 transition-all duration-300">
+            {/* Page Title */}
+            <h2 className="text-lg lg:text-xl font-bold text-slate-800 tracking-tight">
+                Dashboard
+            </h2>
 
-            <div className="flex items-center gap-3">
-                <div className="text-right hidden sm:block">
-                    <p className="text-xs text-gray-500">Anonymous ID</p>
-                    <p className="text-sm font-semibold text-gray-800">{userId.slice(-6)}</p>
-                </div>
-                <div className="w-10 h-10 bg-blue-500 rounded-full text-white flex items-center justify-center">
-                    {userName?.[0] ?? "U"}
-                </div>
+            {/* Right section: Profile & Notifications */}
+            <div className="flex items-center gap-6">
+                <NotificationDropdown />
+                
+                {/* Dark Mode Icon */}
+                <button className="text-slate-400 hover:text-slate-600 transition-colors">
+                    <Moon size={20} fill="#64748b" />
+                </button>
+
+                <div className="h-8 w-[1.5px] bg-slate-100" />
+
+                {/* User Section Link to Profile */}
+                <Link href="/dashboard/profile" className="group flex items-center gap-4 hover:opacity-80 transition-all">
+                    <div className="text-right hidden sm:block">
+                        <p className="text-[13px] font-bold text-slate-700 leading-none mb-1 group-hover:text-blue-600 transition-colors">
+                            {userName}
+                        </p>
+                        <p className="text-[11px] font-medium text-slate-400 tracking-tight leading-none">
+                            ID: #{userId.slice(-5).toUpperCase()}
+                        </p>
+                    </div>
+                    
+                    {/* User Avatar */}
+                    <div className="relative">
+                        <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all border border-slate-200 group-hover:border-blue-100">
+                            <User size={18} fill="currentColor" />
+                        </div>
+                    </div>
+                </Link>
             </div>
         </header>
     );

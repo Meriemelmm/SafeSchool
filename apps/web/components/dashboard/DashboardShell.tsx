@@ -41,14 +41,14 @@ export default function DashboardShell({ children }: Props) {
     <div className="min-h-screen flex bg-[#f3f6fc] text-gray-900">
       <DashboardSidebar role={role} logout={logout} />
       <div className="flex-1 flex flex-col">
-        {/* Hide header for students to match the image design */}
-        {role !== UserRole.STUDENT && (
-          <DashboardHeader
-            userName={`${user.firstName} ${user.lastName}`}
-            userId={user._id}
-            role={role}
-          />
-        )}
+
+
+        <DashboardHeader
+          userName={`${user.firstName} ${user.lastName}`}
+          userId={user._id}
+          role={role}
+        />
+
         <main className="flex-1 p-8 overflow-auto">{children}</main>
       </div>
     </div>

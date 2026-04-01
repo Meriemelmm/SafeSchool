@@ -11,10 +11,10 @@ interface Props {
 }
 
 const ROLE_OPTIONS: { value: RoleIncident; label: string; color: string }[] = [
-  { value: RoleIncident.VICTIME,            label: 'Victime',              color: 'text-blue-600 bg-blue-50' },
-  { value: RoleIncident.AUTEUR_PRESUME,     label: 'Auteur présumé',       color: 'text-red-600 bg-red-50' },
-  { value: RoleIncident.TEMOIN,             label: 'Témoin',               color: 'text-amber-600 bg-amber-50' },
-  { value: RoleIncident.PERSONNEL_EN_CHARGE,label: 'Personnel responsable', color: 'text-green-600 bg-green-50' },
+  { value: RoleIncident.VICTIME, label: 'Victime', color: 'text-blue-600 bg-blue-50' },
+  { value: RoleIncident.AUTEUR_PRESUME, label: 'Auteur présumé', color: 'text-red-600 bg-red-50' },
+  { value: RoleIncident.TEMOIN, label: 'Témoin', color: 'text-amber-600 bg-amber-50' },
+  { value: RoleIncident.PERSONNEL_EN_CHARGE, label: 'Personnel responsable', color: 'text-green-600 bg-green-50' },
 ];
 
 export default function SignalementStep3({ members, onChange }: Props) {

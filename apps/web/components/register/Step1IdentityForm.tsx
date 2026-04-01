@@ -68,8 +68,8 @@ export default function Step1IdentityForm({ formData, setFormData, nextStep, set
     <div className="flex flex-col items-center">
       {/* Title */}
       <div className="text-center mb-8">
-        <h2 className="text-xl font-bold text-gray-900">Who are you?</h2>
-        <p className="text-sm text-gray-500 mt-1">Select your role to help us tailor your experience.</p>
+        <h2 className="text-xl font-bold text-gray-900">Qui êtes-vous ?</h2>
+        <p className="text-sm text-gray-500 mt-1">Sélectionnez votre rôle pour nous aider à personnaliser votre expérience.</p>
       </div>
 
       {/* Role Cards */}
@@ -78,7 +78,7 @@ export default function Step1IdentityForm({ formData, setFormData, nextStep, set
           {
             role: UserRole.STUDENT,
             label: 'Student',
-            sub: 'Reporting for myself or peers',
+            sub: 'Je signale pour moi-même ou des pairs',
             icon: (
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" />
@@ -88,7 +88,7 @@ export default function Step1IdentityForm({ formData, setFormData, nextStep, set
           {
             role: UserRole.PARENT,
             label: 'Parent',
-            sub: 'Reporting for my child',
+            sub: 'Je signale pour mon enfant',
             icon: (
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
@@ -99,7 +99,7 @@ export default function Step1IdentityForm({ formData, setFormData, nextStep, set
           {
             role: UserRole.TEACHER,
             label: 'Staff',
-            sub: 'Teacher or Administrator',
+            sub: 'Enseignant ou administrateur',
             icon: (
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
@@ -129,7 +129,7 @@ export default function Step1IdentityForm({ formData, setFormData, nextStep, set
       {isStaff && (
         <div className="w-full mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="flex flex-col gap-3 p-5 bg-blue-50/40 border-2 border-dashed border-blue-200 rounded-2xl">
-            <label className="text-xs font-bold text-blue-600 uppercase tracking-widest">Specify your Staff Role</label>
+            <label className="text-xs font-bold text-blue-600 uppercase tracking-widest">Précisez votre fonction</label>
             <div className="relative">
               <select
                 value={formData.role}
@@ -144,7 +144,7 @@ export default function Step1IdentityForm({ formData, setFormData, nextStep, set
               </div>
             </div>
             <p className="text-[11px] text-blue-500/80 px-1 font-medium leading-relaxed">
-              * Choosing <strong>Administrator</strong> grants authority to oversee school-level safety metrics.
+              * choisir <strong>Administrateur</strong> donne accès à la supervision des indicateurs de sécurité à l'échelle de l'école.
             </p>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function Step1IdentityForm({ formData, setFormData, nextStep, set
       {/* Name fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-gray-500 ml-1">First Name</label>
+          <label className="text-xs font-semibold text-gray-500 ml-1">Prénom</label>
           <input
             type="text"
             placeholder="e.g. Jean"
@@ -164,7 +164,9 @@ export default function Step1IdentityForm({ formData, setFormData, nextStep, set
           <FieldError field="firstName" />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-gray-500 ml-1">Last Name</label>
+          <label className="text-xs font-semibold text-gray-500 ml-1">
+
+            Nom de famille</label>
           <input
             type="text"
             placeholder="e.g. Dupont"
@@ -179,7 +181,7 @@ export default function Step1IdentityForm({ formData, setFormData, nextStep, set
       {/* Email field */}
       <div className="w-full mb-6">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-gray-500 ml-1">School Email Address</label>
+          <label className="text-xs font-semibold text-gray-500 ml-1">Adresse e-mail </label>
           <input
             type="email"
             placeholder="yourname@school.edu"
@@ -206,10 +208,10 @@ export default function Step1IdentityForm({ formData, setFormData, nextStep, set
           />
         </div>
         <label htmlFor="terms" className="cursor-pointer select-none flex-1">
-          <p className="text-sm font-bold text-gray-900 leading-tight">Confidentiality Guarantee</p>
+          <p className="text-sm font-bold text-gray-900 leading-tight">Garantie de confidentialité</p>
           <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-            I understand that all information provided is protected under our{' '}
-            <a href="/privacy" className="text-blue-600 font-bold hover:underline">Privacy Shield</a> program.
+            Je comprends que toutes les informations fournies sont protégées dans le cadre de notre programme{' '}
+            <a href="/privacy" className="text-blue-600 font-bold hover:underline">Bouclier de confidentialité.</a>
           </p>
           {fieldErrors.acceptedTerms && (
             <p className="text-xs text-red-500 mt-1">{fieldErrors.acceptedTerms}</p>

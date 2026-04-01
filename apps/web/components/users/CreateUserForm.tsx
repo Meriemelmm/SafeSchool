@@ -63,7 +63,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onSuccess, onCan
       ...formData,
       profileData: {
         ...profileData,
-        // Ensure classes is an array for teacher
+       
         ...(formData.role === UserRole.TEACHER && profileData.classes ? { 
           classes: typeof profileData.classes === 'string' ? profileData.classes.split(',').map((s: string) => s.trim()) : profileData.classes 
         } : {})

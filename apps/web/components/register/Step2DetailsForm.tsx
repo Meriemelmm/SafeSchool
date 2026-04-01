@@ -72,8 +72,8 @@ export default function Step2DetailsForm({ formData, setFormData, nextStep, prev
     <div className="flex flex-col items-center">
       {/* Title */}
       <div className="text-center mb-8">
-        <h2 className="text-xl font-bold text-gray-900">Secure your account</h2>
-        <p className="text-sm text-gray-500 mt-1">Create a strong password to protect your data.</p>
+        <h2 className="text-xl font-bold text-gray-900">Secure votr compte</h2>
+        <p className="text-sm text-gray-500 mt-1">Créez un  Password sécurisé pour protéger vos données.</p>
       </div>
 
       <div className="w-full max-w-md mx-auto flex flex-col gap-5 mb-8">

@@ -14,18 +14,7 @@ export default function Navbar() {
             <span className="text-2xl font-bold text-slate-900 tracking-tight">SafeSchool</span>
           </Link>
 
-          {/* Navigation Links - Desktop */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="#how-it-works" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
-              Comment ça marche
-            </Link>
-            <Link href="#community" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
-              Qui peut l'utiliser ?
-            </Link>
-            <Link href="#ressources" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
-              Ressources
-            </Link>
-          </div>
+         
 
           {/* Auth Buttons */}
           <div className="flex items-center space-x-4">

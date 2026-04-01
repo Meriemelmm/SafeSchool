@@ -3,3 +3,4 @@ export* from './signalement-enums';
 export *from './preuve-type.enum';
 export *from './roleIncedent.enum';
 export * from './etablissement-type.enum';
+export * from './notification-type.enum';

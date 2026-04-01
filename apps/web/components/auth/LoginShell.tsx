@@ -65,7 +65,7 @@ export default function LoginShell() {
       <div className="flex flex-col items-center">
         <div className="text-center mb-10 w-full">
           <h1 className="text-2xl font-bold text-[#1e293b]">Welcome Back</h1>
-          <p className="text-sm text-gray-500 mt-2">Login to access your secure dashboard.</p>
+          <p className="text-sm text-gray-500 mt-2">Connectez-vous pour accéder à votre tableau de bord sécurisé</p>
         </div>
 
         {error && (
