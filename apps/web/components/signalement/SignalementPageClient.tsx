@@ -66,7 +66,10 @@ export function SignalementPageClient({ initialData = [], title, description, ch
     setServerSearch(searchTerm);
     setCurrentPage(1); 
   };
-
+const handleDeleted = (id: string) => {
+  setSignalements((prev) => prev.filter((s) => s._id !== id));
+  setTotalItems((prev) => prev - 1);
+};
   const handleCreate = () => {
     const currentPath = window.location.pathname;
     if (currentPath.includes('/student')) {
@@ -111,12 +114,12 @@ export function SignalementPageClient({ initialData = [], title, description, ch
           <div className="col-span-full p-6 text-center text-red-500">{fetchError}</div>
         ) : filteredData.length > 0 ? (
           filteredData.map((item) => (
-            <SignalementCard
-              key={item._id}
-              signalement={item}
-              onView={(id) => setSelectedId(id)}
-              
-            />
+           <SignalementCard
+  key={item._id}
+  signalement={item}
+  onView={(id) => setSelectedId(id)}
+  onDeleted={handleDeleted}  // ← ajoute cette ligne
+/>
           ))
         ) : (
           <div className="col-span-full">
