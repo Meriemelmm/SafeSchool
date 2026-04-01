@@ -13,6 +13,6 @@ import { MailModule } from 'src/mail/mail.module';
   ],
   controllers: [UsersController],
   providers: [UsersService],
-  exports: [UsersService], // Export UsersService so AuthModule can use it
+  exports: [UsersService], 
 })
 export class UsersModule {}

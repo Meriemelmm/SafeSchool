@@ -20,9 +20,7 @@ export class StudentProfileDto {
   @IsMongoId({ message: "L'ID de l'établissement doit être valide" })
   etablissementId?: string;
 
-  // @IsNotEmpty({ message: 'Le numéro scolaire est obligatoire pour un élève' })
-  // @IsString({ message: 'Le numéro scolaire doit être une chaîne de caractères' })
-  // numeroScolaire: string;
+  
 
   @IsOptional()
   @IsString()

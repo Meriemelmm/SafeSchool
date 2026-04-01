@@ -8,6 +8,7 @@ import {
 } from '@/signalement/schemas/signalement.schema';
 import { SignalementMemberModule } from '@/signalement-member/signalement-member.module';
 import { PreuveModule } from '@/preuve/preuve.module';
+import { UsersModule } from '@/users/users.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { PreuveModule } from '@/preuve/preuve.module';
     ]),
     SignalementMemberModule,
     PreuveModule,
+    UsersModule,
   ],
   controllers: [SignalementController],
   providers: [SignalementService],

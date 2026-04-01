@@ -1,4 +1,4 @@
-// src/auth/guards/jwt-auth.guard.ts
+
 import {
   Injectable,
   ExecutionContext,
@@ -18,7 +18,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const authHeader = request.headers.authorization;
     const tokenFromCookie = request.cookies?.token;
 
-    // Allow either Authorization header or cookie
+    
     if (!authHeader && !tokenFromCookie) {
       throw new UnauthorizedException({
         statusCode: 401,
