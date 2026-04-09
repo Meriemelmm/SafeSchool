@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.next/
+.git/
+.env
+README.md
+nest-cli.json
+tsconfig.build.json
+tsconfig.tsbuildinfo
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.DS_Store
+*.log

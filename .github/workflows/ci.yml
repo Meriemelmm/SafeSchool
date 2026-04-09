@@ -1,0 +1,47 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+jobs:
+  lint-and-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build Shared Package
+      run: npm run build -w packages/shared || true
+
+    - name: Security Audit
+      run: npm audit --audit-level=high || true
+
+    - name: Lint Check (API)
+      run: npm run lint -w apps/api || true
+
+    - name: Lint Check (Web)
+      run: npm run lint -w apps/web || true
+
+    - name: Type-check (API)
+      run: npx tsc -p apps/api/tsconfig.json --noEmit || true
+
+    - name: Type-check (Web)
+      run: npx tsc -p apps/web/tsconfig.json --noEmit || true
+
+    - name: Build API
+      run: npm run build -w apps/api
+
+    - name: Build Web
+      run: npm run build -w apps/web
