@@ -49,9 +49,9 @@ Bienvenue sur le projet SafeSchool ! Voici comment découvrir l’application :
 
 - Next.js (TypeScript) pour le frontend
 - NestJS (TypeScript) pour le backend
-- MongoDB / Mongoose (probable d’après la structure du code)
+- MongoDB
 - Authentification JWT et gestion des rôles
-- Upload de fichiers pour les preuves
+- Multer pour uploade les preuves
 
 ## Comment contribuer
 
