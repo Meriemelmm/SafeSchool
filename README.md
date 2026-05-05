@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 
 SafeSchool is a web platform designed to improve safety and communication inside schools.  
 It allows students, teachers, and administrators to report incidents, receive notifications in real-time, and manage school safety efficiently.
@@ -66,5 +66,4 @@ Bienvenue sur le projet SafeSchool ! Voici comment découvrir l’application :
 3. Lancer le backend et le frontend
 4. Soumettre une Pull Request avec une description claire des changements
 
-> Ce README est conçu pour aider un visiteur à comprendre rapidement l’objectif de SafeSchool, ses fonctionnalités et où trouver les versions déployées.
->>>>>>> de39f1b (ajout du fichier README.md avec la présentation du projet, ses fonctionnalités et les instructions pour contribuer)
+
