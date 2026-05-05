@@ -58,6 +58,6 @@ Bienvenue sur le projet SafeSchool ! Voici comment découvrir l’application :
 1. Cloner le dépôt
 2. Installer les dépendances
 3. Lancer le backend et le frontend
-4. Soumettre une Pull Request avec une description claire des changements
+
 
 
