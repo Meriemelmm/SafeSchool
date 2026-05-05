@@ -1,10 +1,4 @@
 
-
-SafeSchool is a web platform designed to improve safety and communication inside schools.  
-It allows students, teachers, and administrators to report incidents, receive notifications in real-time, and manage school safety efficiently.
- lien de deployement frontend:https://safeschool-web.onrender.com/
- lien de deployement backend :https://safeschool-api.onrender.com/
-=======
 # SafeSchool
 
 SafeSchool est une application de signalement sécurisée pour les établissements scolaires. Elle combine une interface web moderne avec une API NestJS pour permettre aux utilisateurs d’envoyer, consulter et suivre des signalements, des preuves et des notifications.
