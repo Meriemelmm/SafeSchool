@@ -416,4 +416,11 @@ export class SignalementService {
       },
     };
   }
+   async signalementByNature(nature:string){
+    console.log("nature",nature);
+
+  const signalementByNature= await this.signalementModel.find({isDeleted:false,nature:nature});
+    return signalementByNature;
+
+   }
 }

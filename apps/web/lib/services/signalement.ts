@@ -66,5 +66,11 @@ export const signalementService = {
   async delete(id: string) {
     const response = await api.delete<{ message: string }>(`/signalement/${id}`);
     return response.data;
-  }
+  },
+   async signalementByNature (nature:string){
+     const response= await api.get('/signalement/nature');
+     console.log("response.data",response.data);
+     return response.data;
+
+   }
 };

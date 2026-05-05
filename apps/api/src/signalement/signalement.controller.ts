@@ -40,6 +40,18 @@ export class SignalementController {
       data: signalement,
     };
   }
+  @Get('nature')
+   @UseGuards(JwtAuthGuard,RolesGuard)
+   @Roles(UserRole.ADMIN,UserRole.TEACHER)
+    async filterByNature(@Query('nature') nature){
+        const  signalementNature=  await this.signalementService.signalementByNature(nature);
+         return {
+           message:" liste des signalements par nature",
+           data:signalementNature
+         }
+
+    }
+
 
   @Get('my-reports')
   @UseGuards(JwtAuthGuard, RolesGuard)
